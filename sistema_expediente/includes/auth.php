@@ -16,7 +16,7 @@ ini_set('log_errors', '1');
 const HASH_FALSO = '$2y$10$T/5X7Elc7KAgT91F5Iu1n.BnVjX82H.HvTRdWyTHEL8Gvoz59Se3O';
 
 // Roles que pueden crear y modificar expedientes. La Vicerrectora solo consulta.
-const ROLES_EDICION = ['Preceptora', 'Coordinadora', 'Administradora'];
+const ROLES_EDICION = ['preceptora', 'coordinadora', 'admin'];
 
 // Cabeceras de seguridad (el sistema no usa JavaScript, por eso la política es estricta).
 header('X-Frame-Options: DENY');
@@ -128,7 +128,7 @@ function require_login(): array
     $_SESSION['ultima_actividad'] = time();
 
     // Se vuelve a consultar el usuario: si fue desactivado o cambió de rol, se aplica de inmediato.
-    $st = db()->prepare('SELECT id_usuario, nombre, usuario, rol, id_carrera FROM usuario WHERE id_usuario = ? AND activo = 1');
+    $st = db()->prepare('SELECT id_usuario, nombre, usuario, rol, id_carrera FROM usuarios WHERE id_usuario = ? AND activo = 1');
     $st->execute([(int)$u['id_usuario']]);
     $fresco = $st->fetch();
     if (!$fresco) {
@@ -164,6 +164,12 @@ function exigir_edicion(array $usuario): void
 
 function auditar(string $accion, ?string $detalle, ?int $idEstudiante, int $idUsuario): void
 {
-    $st = db()->prepare('INSERT INTO auditoria (accion, detalle, id_usuario, id_estudiante) VALUES (?, ?, ?, ?)');
-    $st->execute([$accion, $detalle, $idUsuario, $idEstudiante]);
+    if (str_starts_with($accion, 'Inicio')) { $tipo = 'LOGIN'; }
+    elseif (str_starts_with($accion, 'Alta') || str_starts_with($accion, 'Carga')) { $tipo = 'INSERT'; }
+    elseif (str_starts_with($accion, 'Elimin')) { $tipo = 'DELETE'; }
+    else { $tipo = 'UPDATE'; }
+
+    $motivo = mb_substr($accion . ($detalle ? ': ' . $detalle : ''), 0, 255);
+    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo, ip) VALUES (?, ?, ?, ?, ?, ?)');
+    $st->execute([$idUsuario, 'estudiantes', $idEstudiante, $tipo, $motivo, $_SERVER['REMOTE_ADDR'] ?? null]);
 }

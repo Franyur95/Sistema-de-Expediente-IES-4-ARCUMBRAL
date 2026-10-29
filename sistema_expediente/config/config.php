@@ -7,9 +7,9 @@
 // --- Base de datos ---
 define('DB_HOST', 'localhost');
 define('DB_PORT', '3306');
-define('DB_NAME', 'sistema_expediente');
-define('DB_USER', 'root');   // En XAMPP por defecto: root
-define('DB_PASS', '');       // En XAMPP por defecto: vacía
+define('DB_NAME', 'ies4_expedientes_v2');
+define('DB_USER', 'expedientes'); 
+define('DB_PASS', '1234'); 
 define('DB_CHARSET', 'utf8mb4');
 
 // --- Aplicación ---

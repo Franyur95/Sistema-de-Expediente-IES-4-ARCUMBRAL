@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($usuarioIngresado === '' || $clave === '') {
         $error = 'Ingrese usuario y contraseña.';
     } else {
-        $st = db()->prepare('SELECT id_usuario, nombre, usuario, clave, rol, id_carrera FROM usuario WHERE usuario = ? AND activo = 1');
+        $st = db()->prepare('SELECT id_usuario, nombre, usuario, clave_hash AS clave, rol, id_carrera FROM usuario WHERE usuario = ? AND activo = 1');
         $st->execute([$usuarioIngresado]);
         $u = $st->fetch();
 

@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_valido()) {
         $errores[] = 'El formulario venció. Intente nuevamente.';
     } else {
-        $st = db()->prepare('SELECT clave FROM usuario WHERE id_usuario = ?');
+        $st = db()->prepare('SELECT clave_hash FROM usuarios WHERE id_usuario = ?');
         $st->execute([$usuario['id_usuario']]);
         $hash = (string)$st->fetchColumn();
 
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!$errores) {
-            $up = db()->prepare('UPDATE usuario SET clave = ? WHERE id_usuario = ?');
+            $up = db()->prepare('UPDATE usuarios SET clave_hash = ?, debe_cambiar_clave = 0 WHERE id_usuario = ?');
             $up->execute([password_hash($nueva, PASSWORD_DEFAULT), $usuario['id_usuario']]);
             auditar('Cambio de contraseña', null, null, $usuario['id_usuario']);
             session_regenerate_id(true);
