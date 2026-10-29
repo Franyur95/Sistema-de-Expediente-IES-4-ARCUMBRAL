@@ -1,0 +1,138 @@
+/* Estilos propios (CSS3 básico, sin frameworks) */
+:root {
+  --azul: #1f4e79;
+  --azul-osc: #163a5a;
+  --fondo: #f1f4f7;
+  --borde: #c9d1d9;
+  --texto: #22303c;
+  --ok: #1e6b35;
+  --ok-fondo: #e4f4e8;
+  --error: #a4231b;
+  --error-fondo: #fbe9e7;
+  --aviso: #7a5800;
+  --aviso-fondo: #fff4d6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--texto);
+  background: var(--fondo);
+}
+
+.contenedor { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+main.contenedor { padding-top: 8px; padding-bottom: 32px; min-height: 70vh; }
+
+h1 { font-size: 1.6rem; color: var(--azul-osc); margin: 20px 0 14px; }
+h2 { font-size: 1.2rem; color: var(--azul-osc); margin: 0 0 10px; }
+h3 { font-size: 1.05rem; margin: 14px 0 8px; }
+
+a { color: var(--azul); }
+
+/* Barra superior */
+.barra { background: var(--azul); color: #fff; }
+.barra-interna { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+.marca { color: #fff; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: block; }
+.marca small { display: block; font-weight: normal; font-size: .8rem; opacity: .85; }
+.menu { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+.menu a { color: #fff; text-decoration: none; padding: 4px 0; }
+.menu a:hover, .menu a:focus { text-decoration: underline; }
+.usuario { font-size: .85rem; opacity: .9; }
+.form-inline { display: inline; margin: 0; }
+.btn-link { background: none; border: 0; color: #fff; font: inherit; cursor: pointer; padding: 4px 0; text-decoration: underline; }
+
+/* Tarjetas y menú de inicio */
+.tarjeta { background: #fff; border: 1px solid var(--borde); border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+.tarjeta-login { max-width: 420px; margin-left: auto; margin-right: auto; }
+
+.grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.opcion { display: block; background: #fff; border: 1px solid var(--borde); border-left: 5px solid var(--azul); border-radius: 6px; padding: 14px; text-decoration: none; color: var(--texto); }
+.opcion strong { display: block; color: var(--azul-osc); margin-bottom: 4px; }
+.opcion span { font-size: .9rem; }
+.opcion:hover, .opcion:focus { background: #eaf1f8; }
+
+/* Mensajes */
+.alerta { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; border: 1px solid; }
+.alerta ul { margin: 6px 0 0 18px; padding: 0; }
+.alerta.ok { background: var(--ok-fondo); border-color: var(--ok); color: var(--ok); }
+.alerta.error { background: var(--error-fondo); border-color: var(--error); color: var(--error); }
+.alerta.aviso { background: var(--aviso-fondo); border-color: var(--aviso); color: var(--aviso); }
+
+/* Formularios */
+fieldset { border: 1px solid var(--borde); border-radius: 6px; background: #fff; margin: 0 0 16px; padding: 12px 16px 16px; }
+legend { font-weight: bold; color: var(--azul-osc); padding: 0 6px; }
+.fila { display: flex; flex-wrap: wrap; gap: 12px 16px; }
+.fila .campo { flex: 1 1 240px; }
+.campo { margin-bottom: 10px; }
+.campo label { display: block; font-weight: bold; font-size: .92rem; margin-bottom: 4px; }
+input[type=text], input[type=password], input[type=search], input[type=number],
+input[type=date], input[type=tel], select, textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 4px;
+  font: inherit; color: var(--texto); background: #fff;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--azul); border-color: var(--azul); }
+.campo-error input, .campo-error select, .campo-error textarea { border-color: var(--error); background: #fff8f7; }
+.error-campo { display: block; color: var(--error); font-size: .85rem; margin-top: 3px; }
+.ayuda { display: block; color: #5b6b78; font-size: .82rem; margin-top: 3px; }
+.req { color: var(--error); }
+.nota { font-size: .9rem; margin: 0 0 12px; }
+.oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+input[type=checkbox] { width: 20px; height: 20px; }
+
+.botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.botones-arriba { margin: 0 0 14px; }
+.btn { display: inline-block; background: var(--azul); color: #fff; border: 1px solid var(--azul); border-radius: 4px; padding: 9px 18px; font: inherit; text-decoration: none; cursor: pointer; }
+.btn:hover, .btn:focus { background: var(--azul-osc); }
+.btn-sec { background: #fff; color: var(--azul); }
+.btn-sec:hover, .btn-sec:focus { background: #eaf1f8; }
+
+.form-busqueda { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.form-busqueda .campo { flex: 1 1 260px; margin: 0; }
+
+/* Tablas */
+.tabla-wrap { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; background: #fff; }
+.tabla th, .tabla td { border: 1px solid var(--borde); padding: 8px 10px; text-align: left; vertical-align: middle; }
+.tabla thead th { background: #e3ebf3; color: var(--azul-osc); }
+.tabla tbody tr:nth-child(even) { background: #f8fafc; }
+.tabla .centro { text-align: center; }
+.tabla .acciones a { margin-right: 12px; }
+.fila-error td { background: var(--error-fondo) !important; }
+.badge { display: inline-block; background: #e3ebf3; color: var(--azul-osc); font-size: .72rem; border-radius: 10px; padding: 1px 8px; margin-left: 6px; }
+.pendiente { color: var(--error); font-weight: bold; }
+
+/* Grilla de situación académica (réplica de la ficha) */
+.tabla-acad { font-size: .8rem; min-width: 1100px; }
+.tabla-acad th, .tabla-acad td { padding: 4px 6px; }
+.tabla-acad thead th { text-align: center; }
+.tabla-acad td.espacio { min-width: 220px; font-weight: bold; }
+.tabla-acad td.centro { text-align: center; }
+.tabla-acad td.definitiva { font-weight: bold; background: #eef6ee; }
+.tabla-acad small { color: #5b6b78; }
+code { background: #eef1f4; padding: 1px 4px; border-radius: 3px; }
+
+/* Vista de expediente */
+.datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 20px; margin: 0; }
+.dato dt { font-size: .82rem; color: #5b6b78; font-weight: bold; }
+.dato dd { margin: 2px 0 0; }
+
+.paginacion { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 14px 0; }
+
+.pie { background: #e3e9ef; color: #4a5865; font-size: .85rem; padding: 12px 0; }
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.35rem; }
+  .barra-interna { flex-direction: column; align-items: flex-start; }
+  .btn { width: 100%; text-align: center; }
+  .botones { flex-direction: column; }
+}
+
+@media print {
+  .barra, .pie, .botones, .menu { display: none; }
+  body { background: #fff; }
+  .tarjeta { border: 1px solid #999; }
+}
