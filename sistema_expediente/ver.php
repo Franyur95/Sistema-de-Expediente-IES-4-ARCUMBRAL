@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+
 require_once __DIR__ . '/includes/estudiantes.php';
 require_once __DIR__ . '/includes/academico.php';
 
 $usuario = require_login();
+exigir_permiso($usuario, 'expedientes.ver');
 
 $id = id_desde_get();
 $a = $id > 0 ? obtener_estudiante($id) : null;
@@ -12,6 +14,7 @@ if (!$a) {
 }
 // La consulta es libre entre turnos; la modificación se restringe más abajo.
 $puedeModificar = puede_editar($usuario) && carrera_permitida($usuario, (int)$a['id_carrera']);
+$puedeVerAcademico = puede_ver_academico($usuario);
 
 $tipos = cargar_tipos();
 $docs  = docs_desde_db($tipos, $id);
@@ -27,7 +30,9 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
 <div class="botones botones-arriba">
 <?php if ($puedeModificar): ?>
   <a class="btn" href="editar.php?id=<?= (int)$a['id_estudiante'] ?>">Modificar datos</a>
-  <a class="btn" href="academico.php?id=<?= (int)$a['id_estudiante'] ?>">Cargar situación académica</a>
+<?php endif; ?>
+<?php if ($puedeVerAcademico && carrera_permitida($usuario, (int)$a['id_carrera'])): ?>
+  <a class="btn" href="academico.php?id=<?= (int)$a['id_estudiante'] ?>"><?= puede_editar_academico($usuario) ? 'Gestionar situación académica' : 'Ver situación académica' ?></a>
 <?php endif; ?>
   <a class="btn btn-sec" href="buscar.php">Volver a la búsqueda</a>
 </div>
@@ -59,6 +64,7 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
   </dl>
 </section>
 
+<?php if ($puedeVerAcademico): ?>
 <section class="tarjeta">
   <h2>Nuevos registros de inscripción para cursar y recursar</h2>
   <?php render_inscripciones(listar_inscripciones($id)); ?>
@@ -68,6 +74,7 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
   <h2>Situación académica</h2>
   <?php render_situacion_academica(situacion_academica($id, (int)$a['id_carrera'])); ?>
 </section>
+<?php endif; ?>
 
 <section class="tarjeta">
   <h2>Documentación</h2>

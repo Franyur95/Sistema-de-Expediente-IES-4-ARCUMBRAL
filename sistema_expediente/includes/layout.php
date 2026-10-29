@@ -22,10 +22,15 @@ function render_header(string $titulo, ?array $usuario = null): void
 <?php if ($usuario): ?>
     <nav class="menu" aria-label="Menú principal">
       <a href="index.php">Inicio</a>
-<?php if (puede_editar($usuario)): ?>
+<?php if (puede_ver_expedientes($usuario) && puede_editar($usuario)): ?>
       <a href="nuevo.php">Nuevo expediente</a>
 <?php endif; ?>
+<?php if (puede_ver_expedientes($usuario)): ?>
       <a href="buscar.php">Buscar alumnos</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
+      <a href="usuarios.php">Usuarios</a>
+<?php endif; ?>
       <a href="cambiar_clave.php">Mi contraseña</a>
       <span class="usuario"><?= e($usuario['nombre']) ?> (<?= e($usuario['rol']) ?>)</span>
       <form method="post" action="logout.php" class="form-inline">

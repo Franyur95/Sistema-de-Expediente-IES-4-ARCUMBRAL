@@ -1,8 +1,10 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+
 require_once __DIR__ . '/includes/estudiantes.php';
 
 $usuario = require_login();
+exigir_permiso($usuario, 'expedientes.ver');
 
 $q = is_string($_GET['q'] ?? null) ? mb_substr(trim($_GET['q']), 0, 50) : '';
 $pagina = (isset($_GET['pagina']) && is_string($_GET['pagina']) && ctype_digit($_GET['pagina']) && (int)$_GET['pagina'] >= 1)
@@ -18,7 +20,7 @@ if ($q !== '') {
 }
 $sqlWhere = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
-$st = db()->prepare('SELECT COUNT(*) FROM estudiante e' . $sqlWhere);
+$st = db()->prepare('SELECT COUNT(*) FROM estudiantes e' . $sqlWhere);
 $st->execute($params);
 $total = (int)$st->fetchColumn();
 $paginas = max(1, (int)ceil($total / POR_PAGINA));
@@ -26,7 +28,7 @@ $pagina = min($pagina, $paginas);
 
 $st = db()->prepare(
     'SELECT e.id_estudiante, e.id_carrera, e.dni, e.apellido, e.nombre, e.anio_ingreso, e.estado, c.nombre AS carrera, c.turno
-     FROM estudiante e JOIN carrera c ON c.id_carrera = e.id_carrera' . $sqlWhere . '
+     FROM estudiantes e JOIN carreras c ON c.id_carrera = e.id_carrera' . $sqlWhere . '
      ORDER BY e.apellido, e.nombre LIMIT :lim OFFSET :off'
 );
 foreach ($params as $k => $v) {

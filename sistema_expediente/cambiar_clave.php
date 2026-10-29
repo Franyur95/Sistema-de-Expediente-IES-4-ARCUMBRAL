@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 
+
 $usuario = require_login();
 $errores = [];
 
@@ -45,6 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 render_header('Cambiar mi contraseña', $usuario);
+if (isset($_GET['obligatoria']) || (int)($usuario['debe_cambiar_clave'] ?? 0) === 1) {
+    echo '<div class="alerta aviso">Por seguridad, debe cambiar la contraseña antes de continuar.</div>';
+}
 if ($errores) {
     echo '<div class="alerta error" role="alert"><ul>';
     foreach ($errores as $m) {
@@ -71,7 +75,9 @@ if ($errores) {
     </div>
     <div class="botones">
       <button type="submit" class="btn">Cambiar contraseña</button>
+<?php if ((int)($usuario['debe_cambiar_clave'] ?? 0) !== 1): ?>
       <a class="btn btn-sec" href="index.php">Cancelar</a>
+<?php endif; ?>
     </div>
   </form>
 </section>

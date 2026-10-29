@@ -13,23 +13,23 @@ const NOTA_APROBACION = 4; // Nota mínima para considerar aprobado un final.
 const NOMBRES_ANIO = [1 => 'PRIMER AÑO', 2 => '2.º AÑO', 3 => '3.er AÑO', 4 => '4.º AÑO'];
 
 const TABLAS_REGISTRO = [
-    'inscripcion' => ['inscripcion', 'id_inscripcion', 'Inscripción'],
-    'cursada'     => ['cursada', 'id_cursada', 'Cursada'],
-    'examen'      => ['examen', 'id_examen', 'Examen'],
+    'inscripcion' => ['cursadas', 'id_cursada', 'Inscripción'],
+    'cursada'     => ['cursadas', 'id_cursada', 'Cursada'],
+    'examen'      => ['examenes_finales', 'id_examen', 'Examen'],
 ];
 
 /* ---------- Lectura ---------- */
 
 function materias_de_carrera(int $idCarrera): array
 {
-    $st = db()->prepare('SELECT id_materia, anio, nombre FROM materia WHERE id_carrera = ? ORDER BY anio, orden, id_materia');
+    $st = db()->prepare('SELECT m.id_materia, m.anio, m.nombre FROM materias m JOIN planes p ON p.id_plan=m.id_plan WHERE p.id_carrera=? AND p.activo=1 AND m.activa=1 ORDER BY m.anio,m.orden,m.id_materia');
     $st->execute([$idCarrera]);
     return $st->fetchAll();
 }
 
 function nombre_materia(int $idMateria): string
 {
-    $st = db()->prepare('SELECT nombre FROM materia WHERE id_materia = ?');
+    $st = db()->prepare('SELECT nombre FROM materias WHERE id_materia = ?');
     $st->execute([$idMateria]);
     return (string)$st->fetchColumn();
 }
@@ -44,55 +44,28 @@ function nota_fmt($n): string
 
 function listar_inscripciones(int $idEst): array
 {
-    $st = db()->prepare(
-        'SELECT i.id_inscripcion, i.fecha, i.anio_cursada, i.condicion, i.observaciones, m.nombre AS materia
-         FROM inscripcion i JOIN materia m ON m.id_materia = i.id_materia
-         WHERE i.id_estudiante = ? ORDER BY i.fecha, i.id_inscripcion'
-    );
-    $st->execute([$idEst]);
-    return $st->fetchAll();
+    $st=db()->prepare("SELECT c.id_cursada AS id_inscripcion,c.fecha_inscripcion AS fecha,c.anio_cursada,CASE c.tipo_inscripcion WHEN 'recursar' THEN 'Recursar' WHEN 'libre' THEN 'Libre' ELSE 'Cursar' END AS condicion,c.observaciones,m.nombre AS materia FROM cursadas c JOIN materias m ON m.id_materia=c.id_materia WHERE c.id_estudiante=? AND c.fecha_inscripcion IS NOT NULL ORDER BY c.fecha_inscripcion,c.id_cursada");
+    $st->execute([$idEst]); return $st->fetchAll();
 }
-
 function listar_cursadas(int $idEst): array
 {
-    $st = db()->prepare(
-        'SELECT c.id_cursada, c.anio_cursada, c.asistencia, c.tp, c.caracter, c.promedio, m.nombre AS materia, m.anio
-         FROM cursada c JOIN materia m ON m.id_materia = c.id_materia
-         WHERE c.id_estudiante = ? ORDER BY m.anio, m.orden, c.anio_cursada'
-    );
-    $st->execute([$idEst]);
-    return $st->fetchAll();
+    $st=db()->prepare("SELECT c.id_cursada,c.anio_cursada,c.asistencia,c.tp,CASE c.caracter WHEN 'regular' THEN 'Regular' WHEN 'libre' THEN 'Libre' WHEN 'promocional' THEN 'Promocion' ELSE '' END AS caracter,c.promedio,m.nombre AS materia,m.anio FROM cursadas c JOIN materias m ON m.id_materia=c.id_materia WHERE c.id_estudiante=? AND (c.caracter IS NOT NULL OR c.asistencia IS NOT NULL OR c.tp IS NOT NULL OR c.promedio IS NOT NULL) ORDER BY m.anio,m.orden,c.anio_cursada");
+    $st->execute([$idEst]); return $st->fetchAll();
 }
-
 function listar_examenes(int $idEst): array
 {
-    $st = db()->prepare(
-        'SELECT x.id_examen, x.tipo, x.fecha, x.nota, x.libro, x.folio, x.observacion, m.nombre AS materia, m.anio
-         FROM examen x JOIN materia m ON m.id_materia = x.id_materia
-         WHERE x.id_estudiante = ? ORDER BY m.anio, m.orden, x.fecha, x.id_examen'
-    );
-    $st->execute([$idEst]);
-    return $st->fetchAll();
+    $st=db()->prepare("SELECT x.id_examen,CASE x.condicion_alumno WHEN 'libre' THEN 'Libre' WHEN 'promocion' THEN 'Promoción' ELSE 'Regular' END AS tipo,x.fecha,x.nota,x.libro,x.folio,x.observacion,m.nombre AS materia,m.anio FROM examenes_finales x JOIN materias m ON m.id_materia=x.id_materia WHERE x.id_estudiante=? ORDER BY m.anio,m.orden,x.fecha,x.id_examen");
+    $st->execute([$idEst]); return $st->fetchAll();
 }
 
 /** Reúne materias, cursadas y exámenes del alumno para armar la grilla por año. */
 function situacion_academica(int $idEst, int $idCarrera): array
 {
-    $cursadas = [];
-    $st = db()->prepare('SELECT * FROM cursada WHERE id_estudiante = ? ORDER BY id_materia, anio_cursada');
-    $st->execute([$idEst]);
-    foreach ($st->fetchAll() as $r) {
-        $cursadas[(int)$r['id_materia']][] = $r;
-    }
-
-    $examenes = [];
-    $st = db()->prepare('SELECT * FROM examen WHERE id_estudiante = ? ORDER BY id_materia, fecha, id_examen');
-    $st->execute([$idEst]);
-    foreach ($st->fetchAll() as $r) {
-        $examenes[(int)$r['id_materia']][] = $r;
-    }
-
-    return ['materias' => materias_de_carrera($idCarrera), 'cursadas' => $cursadas, 'examenes' => $examenes];
+    $cursadas=[];$st=db()->prepare("SELECT c.*,CASE c.caracter WHEN 'regular' THEN 'Regular' WHEN 'libre' THEN 'Libre' WHEN 'promocional' THEN 'Promocion' ELSE '' END AS caracter FROM cursadas c WHERE c.id_estudiante=? AND (c.caracter IS NOT NULL OR c.asistencia IS NOT NULL OR c.tp IS NOT NULL OR c.promedio IS NOT NULL) ORDER BY c.id_materia,c.anio_cursada");$st->execute([$idEst]);
+    foreach($st->fetchAll() as $r)$cursadas[(int)$r['id_materia']][]=$r;
+    $examenes=[];$st=db()->prepare("SELECT x.*,CASE x.condicion_alumno WHEN 'libre' THEN 'Libre' WHEN 'promocion' THEN 'Promoción' ELSE 'Regular' END AS tipo FROM examenes_finales x WHERE x.id_estudiante=? AND x.estado='presente' ORDER BY x.id_materia,x.fecha,x.id_examen");$st->execute([$idEst]);
+    foreach($st->fetchAll() as $r)$examenes[(int)$r['id_materia']][]=$r;
+    return ['materias'=>materias_de_carrera($idCarrera),'cursadas'=>$cursadas,'examenes'=>$examenes];
 }
 
 /* ---------- Presentación (réplica de la ficha en papel) ---------- */
@@ -134,7 +107,7 @@ function render_situacion_academica(array $sit): void
         $porAnio[(int)$m['anio']][] = $m;
     }
     if (!$porAnio) {
-        echo '<p>La carrera no tiene espacios curriculares cargados. Ejecute <code>database/materias_ed_fisica.sql</code>.</p>';
+        echo '<p>La carrera no tiene espacios curriculares activos asociados a un plan vigente en la base de datos.</p>';
         return;
     }
 
@@ -253,13 +226,6 @@ function validar_inscripcion(array $p, array $idsMaterias, int $idEst): array
     if (!in_array($d['condicion'], CONDICIONES, true)) { $e['condicion'] = 'Seleccione la condición.'; }
     if (mb_strlen($d['observaciones']) > 200) { $e['observaciones'] = 'Las observaciones no pueden superar 200 caracteres.'; }
 
-    if (!$e) {
-        $st = db()->prepare('SELECT 1 FROM inscripcion WHERE id_estudiante = ? AND id_materia = ? AND anio_cursada = ? AND condicion = ?');
-        $st->execute([$idEst, (int)$d['id_materia'], (int)$d['anio_cursada'], $d['condicion']]);
-        if ($st->fetchColumn()) {
-            $e['id_materia'] = 'Ya existe esa inscripción (mismo espacio, año y condición).';
-        }
-    }
     return [$e, $d];
 }
 
@@ -316,14 +282,14 @@ function validar_examen(array $p, array $idsMaterias, int $idEst): array
     foreach (['libro' => 'El libro', 'folio' => 'El folio'] as $k => $etq) {
         if ($d[$k] === '') {
             $e[$k] = $etq . ' es obligatorio.';
-        } elseif (mb_strlen($d[$k]) > 50) {
-            $e[$k] = $etq . ' no puede superar 50 caracteres.';
+        } elseif (mb_strlen($d[$k]) > 20) {
+            $e[$k] = $etq . ' no puede superar 20 caracteres.';
         }
     }
     if (mb_strlen($d['observacion']) > 200) { $e['observacion'] = 'La observación no puede superar 200 caracteres.'; }
 
     if (!$e) {
-        $st = db()->prepare('SELECT 1 FROM examen WHERE id_estudiante = ? AND id_materia = ? AND fecha = ?');
+        $st = db()->prepare('SELECT 1 FROM examenes_finales WHERE id_estudiante = ? AND id_materia = ? AND fecha = ?');
         $st->execute([$idEst, (int)$d['id_materia'], $d['fecha']]);
         if ($st->fetchColumn()) {
             $e['fecha'] = 'Ya hay un examen cargado de ese espacio en esa fecha.';
@@ -350,70 +316,50 @@ function en_transaccion(callable $fn)
     }
 }
 
-function guardar_inscripcion(int $idEst, array $d, int $idUsuario): void
+function guardar_inscripcion(int $idEst,array $d,int $idUsuario): void
 {
-    en_transaccion(function (PDO $pdo) use ($idEst, $d, $idUsuario) {
-        $st = $pdo->prepare('INSERT INTO inscripcion (fecha, anio_cursada, condicion, observaciones, id_estudiante, id_materia) VALUES (?, ?, ?, ?, ?, ?)');
-        $st->execute([$d['fecha'], (int)$d['anio_cursada'], $d['condicion'], $d['observaciones'] !== '' ? $d['observaciones'] : null, $idEst, (int)$d['id_materia']]);
-        auditar('Alta de inscripción', nombre_materia((int)$d['id_materia']) . ' (' . $d['condicion'] . ' ' . $d['anio_cursada'] . ')', $idEst, $idUsuario);
+    en_transaccion(function(PDO $pdo) use($idEst,$d,$idUsuario){
+        $tipo=$d['condicion']==='Recursar'?'recursar':'cursar';
+        $st=$pdo->prepare("INSERT INTO cursadas (id_estudiante,id_materia,anio_cursada,fecha_inscripcion,tipo_inscripcion,estado,observaciones) VALUES (?,?,?,?,?,'cursando',?) ON DUPLICATE KEY UPDATE fecha_inscripcion=VALUES(fecha_inscripcion),tipo_inscripcion=VALUES(tipo_inscripcion),observaciones=VALUES(observaciones)");
+        $st->execute([$idEst,(int)$d['id_materia'],(int)$d['anio_cursada'],$d['fecha'],$tipo,$d['observaciones']!==''?$d['observaciones']:null]);
+        auditar('Alta de inscripción',nombre_materia((int)$d['id_materia']).' ('.$d['condicion'].' '.$d['anio_cursada'].')',$idEst,$idUsuario);
     });
 }
-
-/** Si ya existe la cursada de ese espacio y año, se actualiza. */
-function guardar_cursada(int $idEst, array $d, int $idUsuario): void
+function guardar_cursada(int $idEst,array $d,int $idUsuario): void
 {
-    en_transaccion(function (PDO $pdo) use ($idEst, $d, $idUsuario) {
-        $nulo = static fn(string $v) => $v === '' ? null : $v;
-        $st = $pdo->prepare(
-            'INSERT INTO cursada (anio_cursada, asistencia, tp, caracter, promedio, id_estudiante, id_materia)
-             VALUES (?, ?, ?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE asistencia = VALUES(asistencia), tp = VALUES(tp),
-                                     caracter = VALUES(caracter), promedio = VALUES(promedio)'
-        );
-        $st->execute([(int)$d['anio_cursada'], $nulo($d['asistencia']), $d['tp'] === '' ? null : (int)$d['tp'],
-                      $d['caracter'], $nulo($d['promedio']), $idEst, (int)$d['id_materia']]);
-        auditar('Carga de cursada', nombre_materia((int)$d['id_materia']) . ' (' . $d['anio_cursada'] . ')', $idEst, $idUsuario);
+    en_transaccion(function(PDO $pdo) use($idEst,$d,$idUsuario){
+        $nulo=static fn($v)=>$v===''?null:$v;$caracter=['Regular'=>'regular','Libre'=>'libre','Promocion'=>'promocional'][$d['caracter']]??'regular';
+        $st=$pdo->prepare("INSERT INTO cursadas (id_estudiante,id_materia,anio_cursada,asistencia,tp,caracter,promedio,estado) VALUES (?,?,?,?,?,?,?,'cursando') ON DUPLICATE KEY UPDATE asistencia=VALUES(asistencia),tp=VALUES(tp),caracter=VALUES(caracter),promedio=VALUES(promedio),estado=CASE WHEN VALUES(caracter)='promocional' THEN 'promocional' WHEN VALUES(caracter)='libre' THEN 'libre' ELSE 'regular' END");
+        $st->execute([$idEst,(int)$d['id_materia'],(int)$d['anio_cursada'],$nulo($d['asistencia']),$nulo($d['tp']),$caracter,$nulo(str_replace(',','.',$d['promedio']))]);
+        auditar('Carga de cursada',nombre_materia((int)$d['id_materia']).' ('.$d['anio_cursada'].')',$idEst,$idUsuario);
     });
 }
-
-function guardar_examen(int $idEst, array $d, int $idUsuario): void
+function guardar_examen(int $idEst,array $d,int $idUsuario): void
 {
-    en_transaccion(function (PDO $pdo) use ($idEst, $d, $idUsuario) {
-        $st = $pdo->prepare('INSERT INTO examen (tipo, fecha, nota, libro, folio, observacion, id_estudiante, id_materia) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-        $st->execute([$d['tipo'], $d['fecha'], $d['nota'], $d['libro'], $d['folio'], $d['observacion'] !== '' ? $d['observacion'] : null, $idEst, (int)$d['id_materia']]);
-        auditar('Alta de examen', nombre_materia((int)$d['id_materia']) . ' (' . $d['fecha'] . ')', $idEst, $idUsuario);
+    en_transaccion(function(PDO $pdo) use($idEst,$d,$idUsuario){
+        $cond=$d['tipo']==='Libre'?'libre':'regular';
+        $st=$pdo->prepare('SELECT id_cursada FROM cursadas WHERE id_estudiante=? AND id_materia=? ORDER BY anio_cursada DESC LIMIT 1');$st->execute([$idEst,(int)$d['id_materia']]);$idCursada=$st->fetchColumn();
+        $st=$pdo->prepare('SELECT COALESCE(MAX(numero_intento),0)+1 FROM examenes_finales WHERE id_estudiante=? AND id_materia=?');$st->execute([$idEst,(int)$d['id_materia']]);$intento=min(10,(int)$st->fetchColumn());
+        $st=$pdo->prepare("INSERT INTO examenes_finales (id_estudiante,id_materia,id_cursada,numero_intento,condicion_alumno,fecha,nota,estado,libro,folio,observacion) VALUES (?,?,?,?,?,?,?,'presente',?,?,?)");
+        $st->execute([$idEst,(int)$d['id_materia'],$idCursada?:null,$intento,$cond,$d['fecha'],$d['nota'],$d['libro']!==''?$d['libro']:null,$d['folio']!==''?$d['folio']:null,$d['observacion']!==''?$d['observacion']:null]);
+        auditar('Alta de examen',nombre_materia((int)$d['id_materia']).' ('.$d['fecha'].')',$idEst,$idUsuario);
     });
 }
-
-/** Devuelve una descripción del registro (solo si pertenece al alumno) o null. */
-function descripcion_registro(string $tipo, int $idReg, int $idEst): ?string
+function descripcion_registro(string $tipo,int $idReg,int $idEst): ?string
 {
-    if (!isset(TABLAS_REGISTRO[$tipo])) {
-        return null;
-    }
-    [$tabla, $pk, $etq] = TABLAS_REGISTRO[$tipo];
-    $st = db()->prepare("SELECT m.nombre, t.* FROM $tabla t JOIN materia m ON m.id_materia = t.id_materia WHERE t.$pk = ? AND t.id_estudiante = ?");
-    $st->execute([$idReg, $idEst]);
-    $r = $st->fetch();
-    if (!$r) {
-        return null;
-    }
-    $extra = $tipo === 'examen' ? fecha_ar($r['fecha']) . ', nota ' . nota_fmt($r['nota'])
-           : ($tipo === 'inscripcion' ? $r['condicion'] . ' ' . $r['anio_cursada'] : 'año ' . $r['anio_cursada']);
-    return $etq . ': ' . $r['nombre'] . ' (' . $extra . ')';
+    if(!isset(TABLAS_REGISTRO[$tipo]))return null;
+    if($tipo==='examen'){$st=db()->prepare("SELECT m.nombre,x.fecha,x.nota,x.id_examen FROM examenes_finales x JOIN materias m ON m.id_materia=x.id_materia WHERE x.id_examen=? AND x.id_estudiante=?");$st->execute([$idReg,$idEst]);$r=$st->fetch();if(!$r)return null;return 'Examen: '.$r['nombre'].' ('.fecha_ar($r['fecha']).', nota '.nota_fmt($r['nota']).')';}
+    $st=db()->prepare('SELECT m.nombre,c.id_cursada,c.anio_cursada,c.fecha_inscripcion,c.tipo_inscripcion FROM cursadas c JOIN materias m ON m.id_materia=c.id_materia WHERE c.id_cursada=? AND c.id_estudiante=?');$st->execute([$idReg,$idEst]);$r=$st->fetch();if(!$r)return null;
+    if($tipo==='inscripcion'){if(!$r['fecha_inscripcion'])return null;return 'Inscripción: '.$r['nombre'].' ('.$r['tipo_inscripcion'].' '.$r['anio_cursada'].')';}
+    return 'Cursada: '.$r['nombre'].' (año '.$r['anio_cursada'].')';
 }
-
-function eliminar_registro(string $tipo, int $idReg, int $idEst, int $idUsuario): bool
+function eliminar_registro(string $tipo,int $idReg,int $idEst,int $idUsuario): bool
 {
-    $desc = descripcion_registro($tipo, $idReg, $idEst);
-    if ($desc === null) {
-        return false;
-    }
-    [$tabla, $pk] = TABLAS_REGISTRO[$tipo];
-    en_transaccion(function (PDO $pdo) use ($tabla, $pk, $idReg, $idEst, $idUsuario, $desc) {
-        $st = $pdo->prepare("DELETE FROM $tabla WHERE $pk = ? AND id_estudiante = ?");
-        $st->execute([$idReg, $idEst]);
-        auditar('Eliminación de registro académico', $desc, $idEst, $idUsuario);
-    });
-    return true;
+    $desc=descripcion_registro($tipo,$idReg,$idEst);if($desc===null)return false;
+    en_transaccion(function(PDO $pdo)use($tipo,$idReg,$idEst,$idUsuario,$desc){
+        if($tipo==='examen'){$st=$pdo->prepare('DELETE FROM examenes_finales WHERE id_examen=? AND id_estudiante=?');$st->execute([$idReg,$idEst]);}
+        elseif($tipo==='inscripcion'){$st=$pdo->prepare('UPDATE cursadas SET fecha_inscripcion=NULL WHERE id_cursada=? AND id_estudiante=?');$st->execute([$idReg,$idEst]);$chk=$pdo->prepare('SELECT caracter,asistencia,tp,promedio,nota_general,nota_definitiva FROM cursadas WHERE id_cursada=? AND id_estudiante=?');$chk->execute([$idReg,$idEst]);$r=$chk->fetch();if($r&&array_filter($r,static fn($v)=>$v!==null&&$v!=='' )===[]){$del=$pdo->prepare('DELETE FROM cursadas WHERE id_cursada=? AND id_estudiante=?');$del->execute([$idReg,$idEst]);}}
+        else{$st=$pdo->prepare('DELETE FROM cursadas WHERE id_cursada=? AND id_estudiante=?');$st->execute([$idReg,$idEst]);}
+        auditar('Eliminación de registro académico',$desc,$idEst,$idUsuario);
+    });return true;
 }

@@ -84,8 +84,8 @@ function render_form_estudiante(array $d, array $err, array $carreras, array $ti
       <div class="campo<?= isset($err['estado']) ? ' campo-error' : '' ?>">
         <label for="f_estado">Estado del alumno <span class="req" title="Obligatorio">*</span></label>
         <select id="f_estado" name="estado" required>
-<?php foreach (ESTADOS as $est): ?>
-          <option value="<?= e($est) ?>"<?= $est === $d['estado'] ? ' selected' : '' ?>><?= e($est) ?></option>
+<?php foreach (ESTADOS as $est): $etiquetas = ['activo'=>'Activo','libre'=>'Libre','egresado'=>'Egresado','abandono'=>'Abandono','pase'=>'Con pase','fallecido'=>'Fallecido']; ?>
+          <option value="<?= e($est) ?>"<?= $est === $d['estado'] ? ' selected' : '' ?>><?= e($etiquetas[$est] ?? $est) ?></option>
 <?php endforeach; ?>
         </select>
         <?php if (isset($err['estado'])): ?><small class="error-campo"><?= e($err['estado']) ?></small><?php endif; ?>

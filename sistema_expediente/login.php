@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($usuarioIngresado === '' || $clave === '') {
         $error = 'Ingrese usuario y contraseña.';
     } else {
-        $st = db()->prepare('SELECT id_usuario, nombre, usuario, clave_hash AS clave, rol, id_carrera FROM usuario WHERE usuario = ? AND activo = 1');
+        $st = db()->prepare('SELECT id_usuario, nombre, usuario, clave_hash AS clave, rol, id_carrera, debe_cambiar_clave FROM usuarios WHERE usuario = ? AND activo = 1');
         $st->execute([$usuarioIngresado]);
         $u = $st->fetch();
 
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($u && $coincide) {
             if (password_needs_rehash($u['clave'], PASSWORD_DEFAULT)) {
-                $up = db()->prepare('UPDATE usuario SET clave = ? WHERE id_usuario = ?');
+                $up = db()->prepare('UPDATE usuarios SET clave_hash = ? WHERE id_usuario = ?');
                 $up->execute([password_hash($clave, PASSWORD_DEFAULT), $u['id_usuario']]);
             }
             session_regenerate_id(true);
@@ -36,11 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'usuario'    => $u['usuario'],
                 'rol'        => $u['rol'],
                 'id_carrera' => $u['id_carrera'] === null ? null : (int)$u['id_carrera'],
+                'debe_cambiar_clave' => (int)$u['debe_cambiar_clave'],
             ];
             $_SESSION['ultima_actividad'] = time();
             unset($_SESSION['csrf']);
             auditar('Inicio de sesión', null, null, (int)$u['id_usuario']);
-            redirigir('index.php');
+            redirigir((int)$u['debe_cambiar_clave'] === 1 ? 'cambiar_clave.php?obligatoria=1' : 'index.php');
         }
         $error = 'Usuario o contraseña incorrectos.';
     }

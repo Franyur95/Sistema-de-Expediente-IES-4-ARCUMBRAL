@@ -15,8 +15,7 @@ ini_set('log_errors', '1');
 // Hash de relleno para que el tiempo de respuesta no revele si un usuario existe.
 const HASH_FALSO = '$2y$10$T/5X7Elc7KAgT91F5Iu1n.BnVjX82H.HvTRdWyTHEL8Gvoz59Se3O';
 
-// Roles que pueden crear y modificar expedientes. La Vicerrectora solo consulta.
-const ROLES_EDICION = ['preceptora', 'coordinadora', 'admin'];
+// Los permisos efectivos se leen de rol_permiso/permisos, definidos por el esquema v2.
 
 // Cabeceras de seguridad (el sistema no usa JavaScript, por eso la política es estricta).
 header('X-Frame-Options: DENY');
@@ -37,6 +36,7 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
     session_start();
 }
+
 
 /* ---------- Utilidades ---------- */
 
@@ -128,7 +128,7 @@ function require_login(): array
     $_SESSION['ultima_actividad'] = time();
 
     // Se vuelve a consultar el usuario: si fue desactivado o cambió de rol, se aplica de inmediato.
-    $st = db()->prepare('SELECT id_usuario, nombre, usuario, rol, id_carrera FROM usuarios WHERE id_usuario = ? AND activo = 1');
+    $st = db()->prepare('SELECT id_usuario, nombre, usuario, rol, id_carrera, debe_cambiar_clave FROM usuarios WHERE id_usuario = ? AND activo = 1');
     $st->execute([(int)$u['id_usuario']]);
     $fresco = $st->fetch();
     if (!$fresco) {
@@ -137,27 +137,96 @@ function require_login(): array
     }
     $fresco['id_usuario'] = (int)$fresco['id_usuario'];
     $fresco['id_carrera'] = $fresco['id_carrera'] === null ? null : (int)$fresco['id_carrera'];
+    $fresco['debe_cambiar_clave'] = (int)$fresco['debe_cambiar_clave'];
     $_SESSION['usuario'] = $fresco;
+
+    // Las cuentas nuevas o con contraseña restablecida deben cambiarla antes de usar otros módulos.
+    $paginaActual = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
+    if ($fresco['debe_cambiar_clave'] === 1 && !in_array($paginaActual, ['cambiar_clave.php', 'logout.php'], true)) {
+        redirigir('cambiar_clave.php?obligatoria=1');
+    }
 
     return $fresco;
 }
 
-function puede_editar(array $usuario): bool
+/**
+ * Consulta el permiso efectivo del rol en las tablas permisos/rol_permiso.
+ * Los resultados se cachean solo durante esta petición PHP.
+ */
+function tiene_permiso(array $usuario, string $codigo, bool $editar = false): bool
 {
-    return in_array($usuario['rol'], ROLES_EDICION, true);
+    static $cache = [];
+    $rol = (string)($usuario['rol'] ?? '');
+    if ($rol === '' || $codigo === '') {
+        return false;
+    }
+
+    $clave = $rol . '|' . $codigo;
+    if (!array_key_exists($clave, $cache)) {
+        $sql = 'SELECT rp.puede_ver, rp.puede_editar
+                FROM rol_permiso rp
+                INNER JOIN permisos p ON p.id_permiso = rp.id_permiso
+                WHERE rp.rol = ? AND p.codigo = ?
+                LIMIT 1';
+        $st = db()->prepare($sql);
+        $st->execute([$rol, $codigo]);
+        $fila = $st->fetch(PDO::FETCH_ASSOC);
+        $cache[$clave] = $fila ? [
+            'ver' => (int)$fila['puede_ver'] === 1,
+            'editar' => (int)$fila['puede_editar'] === 1,
+        ] : ['ver' => false, 'editar' => false];
+    }
+
+    return $cache[$clave][$editar ? 'editar' : 'ver'];
 }
 
-/** Un usuario con carrera asignada solo puede MODIFICAR alumnos de esa carrera (consultar puede todos). */
+/** Exige permiso de lectura o edición y bloquea el acceso directo a la URL. */
+function exigir_permiso(array $usuario, string $codigo, bool $editar = false): void
+{
+    if (!tiene_permiso($usuario, $codigo, $editar)) {
+        http_response_code(403);
+        $accion = $editar ? 'modificar' : 'consultar';
+        pagina_error(403, 'Acceso denegado', 'Su rol no tiene permiso para ' . $accion . ' este módulo.', $usuario);
+    }
+}
+
+function puede_ver_expedientes(array $usuario): bool
+{
+    return tiene_permiso($usuario, 'expedientes.ver');
+}
+
+function puede_editar(array $usuario): bool
+{
+    return tiene_permiso($usuario, 'expedientes.editar', true);
+}
+
+function puede_ver_academico(array $usuario): bool
+{
+    return tiene_permiso($usuario, 'notas.ver');
+}
+
+function puede_editar_academico(array $usuario): bool
+{
+    return tiene_permiso($usuario, 'notas.editar', true);
+}
+
+/**
+ * Los usuarios con carrera asignada solo pueden operar sobre esa carrera.
+ * Los usuarios sin carrera asignada pueden operar sobre todas las carreras autorizadas por su rol.
+ */
 function carrera_permitida(array $usuario, int $idCarrera): bool
 {
-    return $usuario['id_carrera'] === null || (int)$usuario['id_carrera'] === $idCarrera;
+    return $idCarrera > 0 && (($usuario['id_carrera'] ?? null) === null || (int)$usuario['id_carrera'] === $idCarrera);
 }
 
 function exigir_edicion(array $usuario): void
 {
-    if (!puede_editar($usuario)) {
-        pagina_error(403, 'Acceso denegado', 'Su rol (' . $usuario['rol'] . ') solo permite consultar expedientes.', $usuario);
-    }
+    exigir_permiso($usuario, 'expedientes.editar', true);
+}
+
+function exigir_edicion_academica(array $usuario): void
+{
+    exigir_permiso($usuario, 'notas.editar', true);
 }
 
 /* ---------- Auditoría ---------- */
@@ -170,6 +239,7 @@ function auditar(string $accion, ?string $detalle, ?int $idEstudiante, int $idUs
     else { $tipo = 'UPDATE'; }
 
     $motivo = mb_substr($accion . ($detalle ? ': ' . $detalle : ''), 0, 255);
-    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo, ip) VALUES (?, ?, ?, ?, ?, ?)');
-    $st->execute([$idUsuario, 'estudiantes', $idEstudiante, $tipo, $motivo, $_SERVER['REMOTE_ADDR'] ?? null]);
+    $tabla = str_contains(mb_strtolower($accion), 'contraseña') ? 'usuarios' : (str_contains(mb_strtolower($accion), 'inscrip') || str_contains(mb_strtolower($accion), 'cursada') || str_contains(mb_strtolower($accion), 'examen') ? 'cursadas' : 'estudiantes');
+    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    $st->execute([$idUsuario, $tabla, $idEstudiante, $tipo, $motivo, $_SERVER['REMOTE_ADDR'] ?? null, mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)]);
 }

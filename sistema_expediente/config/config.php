@@ -8,8 +8,9 @@
 define('DB_HOST', 'localhost');
 define('DB_PORT', '3306');
 define('DB_NAME', 'ies4_expedientes_v2');
-define('DB_USER', 'expedientes'); 
-define('DB_PASS', '1234'); 
+define('DB_USER', 'root'); // Usuario habitual de MySQL en XAMPP; cambie si su instalación usa otro.
+define('DB_PASS', ''); // En XAMPP suele estar vacío por defecto.
+
 define('DB_CHARSET', 'utf8mb4');
 
 // --- Aplicación ---

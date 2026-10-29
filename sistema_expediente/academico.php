@@ -1,11 +1,14 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+
 require_once __DIR__ . '/includes/estudiantes.php';
 require_once __DIR__ . '/includes/academico.php';
 require_once __DIR__ . '/includes/form_estudiante.php';
 
 $usuario = require_login();
-exigir_edicion($usuario);
+exigir_permiso($usuario, 'expedientes.ver');
+exigir_permiso($usuario, 'notas.ver');
+$puedeEditarAcademico = puede_editar_academico($usuario);
 
 $id = id_desde_get();
 $alumno = $id > 0 ? obtener_estudiante($id) : null;
@@ -13,7 +16,21 @@ if (!$alumno) {
     pagina_error(404, 'Expediente no encontrado', 'El expediente solicitado no existe.', $usuario);
 }
 if (!carrera_permitida($usuario, (int)$alumno['id_carrera'])) {
-    pagina_error(403, 'Acceso denegado', 'Solo puede cargar la situación académica de alumnos de su carrera.', $usuario);
+    pagina_error(403, 'Acceso denegado', 'No tiene permiso para consultar la situación académica de esta carrera.', $usuario);
+}
+
+// Los roles con notas.ver pero sin notas.editar acceden a una vista estrictamente de lectura.
+if (!$puedeEditarAcademico) {
+    render_header('Situación académica: ' . $alumno['apellido'] . ', ' . $alumno['nombre'], $usuario);
+    echo '<div class="botones botones-arriba"><a class="btn btn-sec" href="ver.php?id=' . (int)$id . '">Volver al expediente</a></div>';
+    echo '<p>DNI ' . e($alumno['dni']) . ' · ' . e($alumno['carrera']) . ' (turno ' . e($alumno['turno']) . ')</p>';
+    echo '<section class="tarjeta"><h2>Inscripciones para cursar y recursar</h2>';
+    render_inscripciones(listar_inscripciones($id));
+    echo '</section><section class="tarjeta"><h2>Situación académica</h2>';
+    render_situacion_academica(situacion_academica($id, (int)$alumno['id_carrera']));
+    echo '</section>';
+    render_footer();
+    exit;
 }
 
 $materias = materias_de_carrera((int)$alumno['id_carrera']);
@@ -24,6 +41,7 @@ $errores = ['inscripcion' => [], 'cursada' => [], 'examen' => []];
 $vals = ['inscripcion' => [], 'cursada' => [], 'examen' => []];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    exigir_permiso($usuario, 'notas.editar', true);
     if (!csrf_valido()) {
         flash('error', 'El formulario venció. Intente nuevamente.');
         redirigir($url);
@@ -255,8 +273,8 @@ render_header('Situación académica: ' . $alumno['apellido'] . ', ' . $alumno['
     <div class="fila">
       <?php campo_texto('fecha', 'Fecha', $v, $er, ['prefijo' => 'exa_', 'type' => 'date', 'required' => true, 'max' => date('Y-m-d')]); ?>
       <?php campo_texto('nota', 'Calificación', $v, $er, ['prefijo' => 'exa_', 'required' => true, 'maxlength' => 5, 'inputmode' => 'decimal', 'ayuda' => 'De 0 a 10.']); ?>
-      <?php campo_texto('libro', 'Libro', $v, $er, ['prefijo' => 'exa_', 'required' => true, 'maxlength' => 50]); ?>
-      <?php campo_texto('folio', 'Folio', $v, $er, ['prefijo' => 'exa_', 'required' => true, 'maxlength' => 50]); ?>
+      <?php campo_texto('libro', 'Libro', $v, $er, ['prefijo' => 'exa_', 'required' => true, 'maxlength' => 20]); ?>
+      <?php campo_texto('folio', 'Folio', $v, $er, ['prefijo' => 'exa_', 'required' => true, 'maxlength' => 20]); ?>
     </div>
     <div class="fila">
       <?php campo_texto('observacion', 'Observación', $v, $er, ['prefijo' => 'exa_', 'maxlength' => 200]); ?>

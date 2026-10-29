@@ -101,6 +101,7 @@ input[type=checkbox] { width: 20px; height: 20px; }
 .tabla tbody tr:nth-child(even) { background: #f8fafc; }
 .tabla .centro { text-align: center; }
 .tabla .acciones a { margin-right: 12px; }
+.tabla .btn-link-osc { color: var(--azul); padding: 2px 0; margin-left: 8px; }
 .fila-error td { background: var(--error-fondo) !important; }
 .badge { display: inline-block; background: #e3ebf3; color: var(--azul-osc); font-size: .72rem; border-radius: 10px; padding: 1px 8px; margin-left: 6px; }
 .pendiente { color: var(--error); font-weight: bold; }

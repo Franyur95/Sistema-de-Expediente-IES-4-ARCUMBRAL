@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
+
 require_once __DIR__ . '/includes/estudiantes.php';
 require_once __DIR__ . '/includes/form_estudiante.php';
 
 $usuario = require_login();
+exigir_permiso($usuario, 'expedientes.ver');
 exigir_edicion($usuario);
 
 $id = id_desde_get();
