@@ -1,6 +1,6 @@
 <?php
 /* Acceso a datos y validaciones compatibles con ies4_expedientes_v2. */
-const ESTADOS = ['activo', 'libre', 'egresado', 'abandono', 'pase', 'fallecido'];
+const ESTADOS = ['activo', 'libre', 'egresado', 'abandono', 'pase'];
 
 function campo(array $origen, string $clave): string {
     $v=$origen[$clave]??''; return is_string($v)?trim($v):'';

@@ -240,6 +240,6 @@ function auditar(string $accion, ?string $detalle, ?int $idEstudiante, int $idUs
 
     $motivo = mb_substr($accion . ($detalle ? ': ' . $detalle : ''), 0, 255);
     $tabla = str_contains(mb_strtolower($accion), 'contraseña') ? 'usuarios' : (str_contains(mb_strtolower($accion), 'inscrip') || str_contains(mb_strtolower($accion), 'cursada') || str_contains(mb_strtolower($accion), 'examen') ? 'cursadas' : 'estudiantes');
-    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    $st->execute([$idUsuario, $tabla, $idEstudiante, $tipo, $motivo, $_SERVER['REMOTE_ADDR'] ?? null, mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)]);
+    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo) VALUES (?, ?, ?, ?, ?)');
+    $st->execute([$idUsuario, $tabla, $idEstudiante, $tipo, $motivo]);
 }
