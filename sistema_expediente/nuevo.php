@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . '/includes/auth.php';
 
@@ -11,21 +12,41 @@ $carreras = carreras_permitidas($usuario);
 $tipos    = cargar_tipos();
 $datos    = datos_vacios($usuario);
 $docs     = docs_vacios($tipos);
-$errores  = [];
+
+$inscripcion = [
+    'fecha_inscripcion' => date('Y-m-d'),
+    'curso' => '',
+    'condicion' => '',
+    'observaciones' => ''
+];
+
+$errores = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $datos = datos_desde_post($_POST);
     $docs  = docs_desde_post($_POST, $tipos);
+    $inscripcion = inscripcion_curso_desde_post($_POST);
 
     if (!csrf_valido()) {
         $errores['general'] = 'El formulario venció. Revise los datos y vuelva a guardar.';
     } else {
-        $errores = validar_estudiante($datos, $usuario, 0) + validar_docs($docs, $tipos);
+        $errores =
+            validar_estudiante($datos, $usuario, 0)
+            + validar_docs($docs, $tipos)
+            + validar_inscripcion_curso($inscripcion);
+
         if (!$errores) {
             try {
-                $id = crear_estudiante($datos, $docs, $usuario['id_usuario']);
-                flash('ok', 'Expediente creado correctamente.');
+                $id = crear_estudiante(
+                    $datos,
+                    $docs,
+                    $usuario['id_usuario'],
+                    $inscripcion
+                );
+
+                flash('ok', 'Expediente e inscripción creados correctamente.');
                 redirigir('ver.php?id=' . $id);
+
             } catch (PDOException $ex) {
                 if (es_duplicado($ex)) {
                     $errores['dni'] = 'Ya existe un expediente con ese DNI. Búsquelo en "Buscar alumnos".';
@@ -33,11 +54,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log('Error al crear expediente: ' . $ex->getMessage());
                     $errores['general'] = 'Ocurrió un error al guardar. No se creó el expediente; intente nuevamente.';
                 }
+            } catch (Throwable $ex) {
+                error_log('Error al crear expediente e inscripción: ' . $ex->getMessage());
+                $errores['general'] = 'Ocurrió un error al guardar. No se creó el expediente; intente nuevamente.';
             }
         }
     }
 }
 
 render_header('Nuevo expediente', $usuario);
-render_form_estudiante($datos, $errores, $carreras, $tipos, $docs, 'nuevo.php', 'Guardar expediente', 'index.php');
+
+render_form_estudiante(
+    $datos,
+    $errores,
+    $carreras,
+    $tipos,
+    $docs,
+    'nuevo.php',
+    'Guardar expediente',
+    'index.php',
+    $inscripcion
+);
+
 render_footer();

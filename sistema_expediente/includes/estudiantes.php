@@ -33,10 +33,113 @@ function cargar_tipos(): array {
     return db()->query('SELECT id_tipo,nombre,obligatorio,vence,dias_alerta FROM tipos_documento WHERE activo=1 ORDER BY orden,id_tipo')->fetchAll();
 }
 function docs_vacios(array $tipos): array { $r=[]; foreach($tipos as $t) $r[(int)$t['id_tipo']]=['presentado'=>false,'fecha'=>'','obs'=>'']; return $r; }
-function docs_desde_db(array $tipos,int $idEstudiante): array {
-    $r=docs_vacios($tipos); $st=db()->prepare('SELECT d.id_tipo,d.presentado,d.fecha_presentacion,d.observaciones FROM documentacion_estudiante d WHERE d.id_estudiante=? ORDER BY d.anio_lectivo DESC,d.id_documento DESC'); $st->execute([$idEstudiante]);
-    foreach($st->fetchAll() as $x){$i=(int)$x['id_tipo']; if(isset($r[$i]) && !isset($seen[$i])){$r[$i]=['presentado'=>(bool)$x['presentado'],'fecha'=>(string)($x['fecha_presentacion']??''),'obs'=>(string)($x['observaciones']??'')];$seen[$i]=true;}} return $r;
+
+function docs_desde_db(array $tipos, int $idEstudiante): array {
+    $r = docs_vacios($tipos);
+    $vence = [];
+
+    foreach ($tipos as $t) {
+        $vence[(int)$t['id_tipo']] = (int)$t['vence'];
+    }
+
+    $st = db()->prepare("
+        SELECT
+            d.id_tipo,
+            d.anio_lectivo,
+            d.presentado,
+            d.fecha_presentacion,
+            d.observaciones
+        FROM documentacion_estudiante d
+        WHERE d.id_estudiante = ?
+        ORDER BY d.anio_lectivo DESC, d.id_documento DESC
+    ");
+
+    $st->execute([$idEstudiante]);
+
+    $vistos = [];
+    $anioActual = (int)date('Y');
+
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $x) {
+        $id = (int)$x['id_tipo'];
+
+        if (!isset($r[$id])) {
+            continue;
+        }
+
+        $presentado = (bool)$x['presentado'];
+
+        // Los documentos que vencen deben corresponder al año actual.
+        if (($vence[$id] ?? 0) === 1) {
+            if ((int)$x['anio_lectivo'] !== $anioActual || isset($vistos[$id])) {
+                continue;
+            }
+
+            $r[$id] = [
+                'presentado' => $presentado,
+                'fecha' => (string)($x['fecha_presentacion'] ?? ''),
+                'obs' => (string)($x['observaciones'] ?? '')
+            ];
+
+            $vistos[$id] = true;
+            continue;
+        }
+
+        // Los documentos que no vencen se conservan si fueron presentados
+        // en cualquier año.
+        if (!isset($vistos[$id])) {
+            $r[$id] = [
+                'presentado' => $presentado,
+                'fecha' => (string)($x['fecha_presentacion'] ?? ''),
+                'obs' => (string)($x['observaciones'] ?? '')
+            ];
+
+            $vistos[$id] = true;
+        } elseif (!$r[$id]['presentado'] && $presentado) {
+            $r[$id] = [
+                'presentado' => true,
+                'fecha' => (string)($x['fecha_presentacion'] ?? ''),
+                'obs' => (string)($x['observaciones'] ?? '')
+            ];
+        }
+    }
+
+    return $r;
 }
+
+function documentos_pendientes_estudiante(
+    int $idEstudiante,
+    ?int $anio = null
+): array {
+    $anio = $anio ?? (int)date('Y');
+
+    $st = db()->prepare("
+        SELECT
+            td.id_tipo,
+            td.nombre,
+            td.vence,
+            td.dias_alerta
+        FROM tipos_documento td
+        WHERE td.obligatorio = 1
+          AND td.activo = 1
+          AND NOT EXISTS (
+              SELECT 1
+              FROM documentacion_estudiante de
+              WHERE de.id_estudiante = ?
+                AND de.id_tipo = td.id_tipo
+                AND de.presentado = 1
+                AND (
+                    td.vence = 0
+                    OR de.anio_lectivo = ?
+                )
+          )
+        ORDER BY td.orden, td.id_tipo
+    ");
+
+    $st->execute([$idEstudiante, $anio]);
+
+    return $st->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function docs_desde_post(array $p,array $tipos): array {
     $pres=is_array($p['doc_presentado']??null)?$p['doc_presentado']:[];$fechas=is_array($p['doc_fecha']??null)?$p['doc_fecha']:[];$obs=is_array($p['doc_obs']??null)?$p['doc_obs']:[];$r=[];
     foreach($tipos as $t){$i=(int)$t['id_tipo'];$r[$i]=['presentado'=>isset($pres[$i]),'fecha'=>isset($fechas[$i])&&is_string($fechas[$i])?trim($fechas[$i]):'','obs'=>isset($obs[$i])&&is_string($obs[$i])?limpiar_espacios($obs[$i]):''];} return $r;
@@ -73,17 +176,163 @@ function validar_estudiante(array $d,array $usuario,int $idActual): array {
     return $e;
 }
 function es_duplicado(PDOException $ex): bool { return (int)($ex->errorInfo[1]??0)===1062; }
+// Obtiene los datos del registro de inscripción desde el formulario.
+function inscripcion_curso_desde_post(array $p): array {
+    return [
+        'fecha_inscripcion' => campo($p, 'fecha_inscripcion'),
+        'curso' => campo($p, 'curso'),
+        'condicion' => campo($p, 'condicion'),
+        'observaciones' => limpiar_espacios(campo($p, 'observaciones_inscripcion'))
+    ];
+}
+
+// Valida los datos del registro de inscripción.
+function validar_inscripcion_curso(array $d): array {
+    $err = [];
+
+    $hoy = new DateTimeImmutable('today');
+
+    if ($d['fecha_inscripcion'] === '') {
+        $err['fecha_inscripcion'] = 'La fecha de inscripción es obligatoria.';
+    } else {
+        $fecha = fecha_valida($d['fecha_inscripcion']);
+
+        if (!$fecha) {
+            $err['fecha_inscripcion'] = 'La fecha de inscripción no es válida.';
+        } elseif ($fecha > $hoy) {
+            $err['fecha_inscripcion'] = 'La fecha de inscripción no puede ser futura.';
+        }
+    }
+
+    if (
+        $d['curso'] === '' ||
+        !ctype_digit($d['curso']) ||
+        (int)$d['curso'] < 1 ||
+        (int)$d['curso'] > 4
+    ) {
+        $err['curso'] = 'Seleccione un curso válido entre 1.º y 4.º año.';
+    }
+
+    if (!in_array($d['condicion'], ['cursar', 'recursar'], true)) {
+        $err['condicion'] = 'Seleccione la condición de cursado.';
+    }
+
+    if (mb_strlen($d['observaciones']) > 1000) {
+        $err['observaciones_inscripcion'] = 'Las observaciones no pueden superar los 1000 caracteres.';
+    }
+
+    return $err;
+}
+
+// Guarda un nuevo registro de inscripción sin eliminar los anteriores.
+function guardar_inscripcion_curso(int $idEstudiante, array $d): void {
+    $st = db()->prepare(
+        'INSERT INTO inscripciones_curso
+        (id_estudiante, fecha_inscripcion, curso, condicion, observaciones)
+        VALUES (?, ?, ?, ?, ?)'
+    );
+
+    $st->execute([
+        $idEstudiante,
+        $d['fecha_inscripcion'],
+        (int)$d['curso'],
+        $d['condicion'],
+        $d['observaciones'] !== '' ? $d['observaciones'] : null
+    ]);
+}
 function parametros_estudiante(array $d): array { $n=static fn($v)=>$v===''?null:$v;return [$d['dni'],$d['apellido'],$d['nombre'],$d['fecha_nacimiento'],$n($d['lugar_nacimiento']),$n($d['domicilio']),$n($d['telefono']),$n($d['titulo_ingreso']),$n($d['establecimiento']),$n($d['anio_ingreso']),$n($d['observaciones']),$d['estado'],(int)$d['id_carrera']]; }
 function obtener_estudiante(int $id): ?array {
     $st=db()->prepare('SELECT e.*,e.created_at AS creado_en,c.nombre AS carrera,c.turno,c.resolucion FROM estudiantes e JOIN carreras c ON c.id_carrera=e.id_carrera WHERE e.id_estudiante=?');$st->execute([$id]);$r=$st->fetch();return $r?:null;
 }
-function crear_estudiante(array $d,array $docs,int $idUsuario): int {
-    $pdo=db();$pdo->beginTransaction();try{
-        $plan=$pdo->prepare('SELECT id_plan FROM planes WHERE id_carrera=? AND activo=1 ORDER BY anio_vigencia DESC,id_plan DESC LIMIT 1');$plan->execute([(int)$d['id_carrera']]);$idPlan=$plan->fetchColumn();
-        $st=$pdo->prepare('INSERT INTO estudiantes (tipo_documento,dni,apellido,nombre,fecha_nacimiento,lugar_nacimiento,domicilio,telefono,titulo_ingreso,establecimiento,anio_ingreso,observaciones,estado,id_carrera,id_plan) VALUES (\'DNI\',?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-        $params=parametros_estudiante($d);$st->execute([$params[0],$params[1],$params[2],$params[3],$params[4],$params[5],$params[6],$params[7],$params[8],$params[9],$params[10],$params[11],$params[12],$idPlan?:null]);
-        $id=(int)$pdo->lastInsertId();guardar_docs($id,$docs);auditar('Alta de expediente','Expediente creado',$id,$idUsuario);$pdo->commit();return $id;
-    }catch(Throwable $ex){if($pdo->inTransaction())$pdo->rollBack();throw $ex;}
+function crear_estudiante(
+    array $d,
+    array $docs,
+    int $idUsuario,
+    array $inscripcion = []
+): int {
+    $pdo = db();
+    $pdo->beginTransaction();
+
+    try {
+        $plan = $pdo->prepare(
+            'SELECT id_plan FROM planes
+             WHERE id_carrera = ? AND activo = 1
+             ORDER BY anio_vigencia DESC, id_plan DESC
+             LIMIT 1'
+        );
+
+        $plan->execute([(int)$d['id_carrera']]);
+        $idPlan = $plan->fetchColumn();
+
+        $st = $pdo->prepare(
+            'INSERT INTO estudiantes (
+                tipo_documento,
+                dni,
+                apellido,
+                nombre,
+                fecha_nacimiento,
+                lugar_nacimiento,
+                domicilio,
+                telefono,
+                titulo_ingreso,
+                establecimiento,
+                anio_ingreso,
+                observaciones,
+                estado,
+                id_carrera,
+                id_plan
+            ) VALUES (
+                \'DNI\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )'
+        );
+
+        $params = parametros_estudiante($d);
+
+        $st->execute([
+            $params[0],
+            $params[1],
+            $params[2],
+            $params[3],
+            $params[4],
+            $params[5],
+            $params[6],
+            $params[7],
+            $params[8],
+            $params[9],
+            $params[10],
+            $params[11],
+            $params[12],
+            $idPlan ?: null
+        ]);
+
+        $id = (int)$pdo->lastInsertId();
+
+        // Guardar la documentación del estudiante.
+        guardar_docs($id, $docs);
+
+        // Guardar el registro de inscripción si fue proporcionado.
+        if ($inscripcion) {
+            guardar_inscripcion_curso($id, $inscripcion);
+        }
+
+        auditar(
+            'Alta de expediente',
+            'Expediente creado',
+            $id,
+            $idUsuario
+        );
+
+        $pdo->commit();
+
+        return $id;
+
+    } catch (Throwable $ex) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        throw $ex;
+    }
 }
 function actualizar_estudiante(int $id,array $d,array $docs,int $idUsuario): void {
     $pdo=db();$pdo->beginTransaction();try{$antes=obtener_estudiante($id);$docsAntes=docs_desde_db(cargar_tipos(),$id);$p=parametros_estudiante($d);

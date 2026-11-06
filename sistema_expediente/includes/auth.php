@@ -233,13 +233,36 @@ function exigir_edicion_academica(array $usuario): void
 
 function auditar(string $accion, ?string $detalle, ?int $idEstudiante, int $idUsuario): void
 {
-    if (str_starts_with($accion, 'Inicio')) { $tipo = 'LOGIN'; }
-    elseif (str_starts_with($accion, 'Alta') || str_starts_with($accion, 'Carga')) { $tipo = 'INSERT'; }
-    elseif (str_starts_with($accion, 'Elimin')) { $tipo = 'DELETE'; }
-    else { $tipo = 'UPDATE'; }
+    if (str_starts_with($accion, 'Inicio')) {
+        $tipo = 'LOGIN';
+    } elseif (str_starts_with($accion, 'Alta') || str_starts_with($accion, 'Carga')) {
+        $tipo = 'INSERT';
+    } elseif (str_starts_with($accion, 'Elimin')) {
+        $tipo = 'DELETE';
+    } else {
+        $tipo = 'UPDATE';
+    }
 
     $motivo = mb_substr($accion . ($detalle ? ': ' . $detalle : ''), 0, 255);
-    $tabla = str_contains(mb_strtolower($accion), 'contraseña') ? 'usuarios' : (str_contains(mb_strtolower($accion), 'inscrip') || str_contains(mb_strtolower($accion), 'cursada') || str_contains(mb_strtolower($accion), 'examen') ? 'cursadas' : 'estudiantes');
-    $st = db()->prepare('INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    $st->execute([$idUsuario, $tabla, $idEstudiante, $tipo, $motivo, $_SERVER['REMOTE_ADDR'] ?? null, mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)]);
+
+    $tabla = str_contains(mb_strtolower($accion), 'contraseña')
+        ? 'usuarios'
+        : (str_contains(mb_strtolower($accion), 'inscrip')
+            || str_contains(mb_strtolower($accion), 'cursada')
+            || str_contains(mb_strtolower($accion), 'examen')
+                ? 'cursadas'
+                : 'estudiantes');
+
+    $st = db()->prepare(
+        'INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, motivo)
+         VALUES (?, ?, ?, ?, ?)'
+    );
+
+    $st->execute([
+        $idUsuario,
+        $tabla,
+        $idEstudiante,
+        $tipo,
+        $motivo
+    ]);
 }

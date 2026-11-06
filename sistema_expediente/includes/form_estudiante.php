@@ -28,8 +28,27 @@ function campo_texto(string $name, string $label, array $d, array $err, array $o
     echo '</div>';
 }
 
-function render_form_estudiante(array $d, array $err, array $carreras, array $tipos, array $docs, string $action, string $boton, string $cancelar): void
-{
+function render_form_estudiante(
+    array $d,
+    array $err,
+    array $carreras,
+    array $tipos,
+    array $docs,
+    string $action,
+    string $boton,
+    string $cancelar,
+    array $inscripcion = []
+): void{
+  $pendientesDocs = [];
+
+foreach ($tipos as $t) {
+    $id = (int)$t['id_tipo'];
+
+    if ((int)$t['obligatorio'] === 1
+        && empty($docs[$id]['presentado'])) {
+        $pendientesDocs[] = $t['nombre'];
+    }
+}
     if ($err) {
         echo '<div class="alerta error" role="alert"><strong>No se guardó el expediente. Revise lo siguiente:</strong><ul>';
         foreach ($err as $mensaje) {
@@ -92,10 +111,85 @@ function render_form_estudiante(array $d, array $err, array $carreras, array $ti
       </div>
     </div>
   </fieldset>
+<?php if ($inscripcion): ?>
+  <fieldset>
+    <legend>Registro de inscripción al curso</legend>
 
+    <div class="fila">
+      <div class="campo<?= isset($err['fecha_inscripcion']) ? ' campo-error' : '' ?>">
+        <label for="f_fecha_inscripcion">Fecha de inscripción <span class="req">*</span></label>
+        <input
+          type="date"
+          id="f_fecha_inscripcion"
+          name="fecha_inscripcion"
+          value="<?= e($inscripcion['fecha_inscripcion'] ?? '') ?>"
+          max="<?= e(date('Y-m-d')) ?>"
+          required
+        >
+        <?php if (isset($err['fecha_inscripcion'])): ?>
+          <small class="error-campo"><?= e($err['fecha_inscripcion']) ?></small>
+        <?php endif; ?>
+      </div>
+
+      <div class="campo<?= isset($err['curso']) ? ' campo-error' : '' ?>">
+        <label for="f_curso">Curso <span class="req">*</span></label>
+        <select id="f_curso" name="curso" required>
+          <option value="">— Seleccione el año —</option>
+          <?php for ($i = 1; $i <= 4; $i++): ?>
+            <option value="<?= $i ?>"<?= (string)($inscripcion['curso'] ?? '') === (string)$i ? ' selected' : '' ?>>
+              <?= $i ?>.º año
+            </option>
+          <?php endfor; ?>
+        </select>
+        <?php if (isset($err['curso'])): ?>
+          <small class="error-campo"><?= e($err['curso']) ?></small>
+        <?php endif; ?>
+      </div>
+
+      <div class="campo<?= isset($err['condicion']) ? ' campo-error' : '' ?>">
+        <label for="f_condicion">Condición <span class="req">*</span></label>
+        <select id="f_condicion" name="condicion" required>
+          <option value="">— Seleccione —</option>
+          <option value="cursar"<?= ($inscripcion['condicion'] ?? '') === 'cursar' ? ' selected' : '' ?>>Cursar</option>
+          <option value="recursar"<?= ($inscripcion['condicion'] ?? '') === 'recursar' ? ' selected' : '' ?>>Recursar</option>
+        </select>
+        <?php if (isset($err['condicion'])): ?>
+          <small class="error-campo"><?= e($err['condicion']) ?></small>
+        <?php endif; ?>
+      </div>
+    </div>
+
+    <div class="campo<?= isset($err['observaciones_inscripcion']) ? ' campo-error' : '' ?>">
+      <label for="f_observaciones_inscripcion">Observaciones de la inscripción</label>
+      <textarea
+        id="f_observaciones_inscripcion"
+        name="observaciones_inscripcion"
+        rows="3"
+        maxlength="1000"
+      ><?= e($inscripcion['observaciones'] ?? '') ?></textarea>
+      <?php if (isset($err['observaciones_inscripcion'])): ?>
+        <small class="error-campo"><?= e($err['observaciones_inscripcion']) ?></small>
+      <?php endif; ?>
+    </div>
+  </fieldset>
+<?php endif; ?>
 <?php if ($tipos): ?>
   <fieldset>
     <legend>Documentación presentada</legend>
+    <?php if ($pendientesDocs): ?>
+    <div class="alerta error" role="alert">
+        <strong>Documentación obligatoria pendiente:</strong>
+        <ul>
+            <?php foreach ($pendientesDocs as $nombre): ?>
+                <li><?= e($nombre) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php else: ?>
+    <div class="alerta ok">
+        Toda la documentación obligatoria está presentada.
+    </div>
+<?php endif; ?>
     <div class="tabla-wrap">
       <table class="tabla">
         <thead>
