@@ -343,3 +343,18 @@ function actualizar_estudiante(int $id,array $d,array $docs,int $idUsuario): voi
     }catch(Throwable $ex){if($pdo->inTransaction())$pdo->rollBack();throw $ex;}
 }
 function id_desde_get(): int { $v=$_GET['id']??'';return is_string($v)&&ctype_digit($v)&&strlen($v)<10?(int)$v:0; }
+
+/** Últimos movimientos registrados de un alumno (auditoría), con el usuario que los hizo. */
+function historial_estudiante(int $idEst, int $limite = 30): array
+{
+    $st = db()->prepare(
+        "SELECT a.fecha, a.accion, a.motivo, u.nombre AS usuario, u.rol
+         FROM auditoria a
+         LEFT JOIN usuarios u ON u.id_usuario = a.id_usuario
+         WHERE a.registro_id = ? AND a.tabla IN ('estudiantes', 'cursadas')
+         ORDER BY a.fecha DESC, a.id_auditoria DESC
+         LIMIT " . (int)$limite
+    );
+    $st->execute([$idEst]);
+    return $st->fetchAll();
+}

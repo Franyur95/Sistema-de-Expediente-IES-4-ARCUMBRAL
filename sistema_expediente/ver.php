@@ -168,4 +168,26 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
     <?php endif; ?>
 </section>
 
+<section class="tarjeta">
+  <h2>Historial de cambios</h2>
+<?php $hist = historial_estudiante($id); if ($hist): ?>
+  <div class="tabla-wrap"><table class="tabla">
+    <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
+    <tbody>
+<?php foreach ($hist as $h): ?>
+      <tr>
+        <td><?= e(date('d/m/Y H:i', strtotime($h['fecha']))) ?></td>
+        <td><?= e($h['usuario'] ?? '—') ?> (<?= e($h['rol'] ?? '') ?>)</td>
+        <td><?= e($h['accion']) ?></td>
+        <td><?= e($h['motivo']) ?></td>
+      </tr>
+<?php endforeach; ?>
+    </tbody>
+  </table></div>
+<?php else: ?>
+  <p>Sin movimientos registrados.</p>
+<?php endif; ?>
+</section>
+
+
 <?php render_footer(); ?>
