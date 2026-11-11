@@ -53,6 +53,7 @@ render_header('Buscar alumnos', $usuario);
       <input type="search" id="q" name="q" value="<?= e($q) ?>" maxlength="50" autofocus>
     </div>
     <button type="submit" class="btn">Buscar</button>
+    <a class="btn btn-sec" href="imprimir_listado.php?<?= e(http_build_query(['q' => $q])) ?>" target="_blank" rel="noopener">Listado imprimible</a>
     <?php if ($q !== ''): ?><a class="btn btn-sec" href="buscar.php">Ver todos</a><?php endif; ?>
   </form>
 </section>
@@ -73,6 +74,7 @@ render_header('Buscar alumnos', $usuario);
         <td><?= e($f['estado']) ?></td>
         <td class="acciones">
           <a href="ver.php?id=<?= (int)$f['id_estudiante'] ?>">Ver</a>
+          <a href="imprimir.php?id=<?= (int)$f['id_estudiante'] ?>" target="_blank" rel="noopener">Imprimir</a>
 <?php if (puede_editar($usuario) && carrera_permitida($usuario, (int)$f['id_carrera'])): ?>
           <a href="editar.php?id=<?= (int)$f['id_estudiante'] ?>">Modificar</a>
 <?php endif; ?>

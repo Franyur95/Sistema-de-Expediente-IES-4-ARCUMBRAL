@@ -23,6 +23,7 @@ render_header('Inicio', $usuario);
 <?php endif; ?>
 <?php if ($puedeVerExpedientes): ?>
   <a class="opcion" href="buscar.php"><strong>Buscar alumnos</strong><span>Por apellido o DNI.</span></a>
+  <a class="opcion" href="reportes.php"><strong>Reportes e impresión</strong><span>Listados y planillas en PDF horizontal.</span></a>
 <?php endif; ?>
 <?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
   <a class="opcion" href="usuarios.php"><strong>Administración de usuarios</strong><span>Consultar cuentas, roles y estado. La edición depende del permiso asignado.</span></a>

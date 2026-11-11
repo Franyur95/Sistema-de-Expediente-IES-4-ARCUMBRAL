@@ -27,6 +27,7 @@ function render_header(string $titulo, ?array $usuario = null): void
 <?php endif; ?>
 <?php if (puede_ver_expedientes($usuario)): ?>
       <a href="buscar.php">Buscar alumnos</a>
+      <a href="reportes.php">Reportes</a>
 <?php endif; ?>
 <?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
       <a href="usuarios.php">Usuarios</a>

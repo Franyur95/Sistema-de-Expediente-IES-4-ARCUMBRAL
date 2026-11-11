@@ -51,6 +51,10 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
     </a>
 <?php endif; ?>
 
+    <a class="btn btn-sec" href="imprimir.php?id=<?= (int)$a['id_estudiante'] ?>" target="_blank" rel="noopener">
+        Imprimir planilla
+    </a>
+
     <a class="btn btn-sec" href="buscar.php">
         Volver a la búsqueda
     </a>
