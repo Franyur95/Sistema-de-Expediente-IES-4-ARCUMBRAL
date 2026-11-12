@@ -1,7 +1,7 @@
 /* Estilos propios (CSS3 básico, sin frameworks) */
 :root {
-  --azul: #1f4e79;
-  --azul-osc: #163a5a;
+  --azul: #0759A8;
+  --azul-osc: #0759A8;
   --fondo: #f1f4f7;
   --borde: #c9d1d9;
   --texto: #22303c;
@@ -136,4 +136,177 @@ code { background: #eef1f4; padding: 1px 4px; border-radius: 3px; }
   .barra, .pie, .botones, .menu { display: none; }
   body { background: #fff; }
   .tarjeta { border: 1px solid #999; }
+}
+
+/* CAPA VISUAL INSTITUCIONAL — no modifica lógica ni formularios */
+:root { --rojo:#E60012; --blanco:#FFFFFF; --negro:#050505; --ancho-lateral:265px; --alto-cabecera:120px; }
+body { color:var(--negro); background:linear-gradient(155deg,#FFFFFF 0%,#FFFFFF 66%,#d7e7f7 100%); min-height:100vh; }
+.contenedor {max-width:none; padding-left:28px; padding-right:28px;}
+.layout-sistema .barra {position:relative; margin-left:var(--ancho-lateral); min-height:var(--alto-cabecera); background:linear-gradient(125deg,#0759A8 0%,#0759A8 78%,#064984 78%,#0759A8 90%);}
+.barra-interna {min-height:var(--alto-cabecera); gap:20px;}
+.marca {display:flex;align-items:center;gap:20px;font-size:1.45rem;line-height:1.2;}
+.marca-emblema {display:flex;align-items:center;justify-content:center;padding-right:20px;border-right:2px solid #FFFFFF;}
+.marca-nombre small {font-size:.72rem; margin-top:5px;}
+.usuario {display:inline-flex;align-items:center;gap:12px;border:1px solid #FFFFFF;border-radius:40px;padding:10px 20px;opacity:1;font-weight:bold;white-space:nowrap;}
+.menu-lateral {position:fixed;z-index:30;inset:0 auto 0 0;width:var(--ancho-lateral);background:linear-gradient(160deg,#0759A8,#064984);color:#FFFFFF;padding:100px 17px 24px;overflow-y:auto;}
+.titulo-sistema {font-size:1.65rem;line-height:1.2;font-weight:bold;margin:0 28px 32px;padding-bottom:24px;border-bottom:1px solid #FFFFFF;}
+.menu-lateral .menu {display:flex;flex-direction:column;align-items:stretch;gap:7px;}
+.menu-lateral .menu a,.menu-lateral .btn-link {display:flex;align-items:center;gap:14px;width:100%;min-height:53px;padding:12px 15px;border:0;border-radius:10px;background:transparent;color:#FFFFFF;text-decoration:none;font-size:.98rem;font-weight:bold;text-align:left;cursor:pointer;}
+.menu-lateral .menu a:hover,.menu-lateral .menu a:focus,.menu-lateral .menu a.activo,.menu-lateral .btn-link:hover,.menu-lateral .btn-link:focus {background:#FFFFFF;color:#0759A8;text-decoration:none;}
+.menu-lateral .nav-icon {font-size:1.7rem;line-height:1;min-width:27px;text-align:center;font-weight:normal;}
+.menu-lateral .form-inline {display:block;}
+.layout-sistema main.contenedor {margin-left:var(--ancho-lateral);min-height:calc(100vh - var(--alto-cabecera));padding:38px 28px 55px;}
+.layout-sistema .pie {margin-left:var(--ancho-lateral);}
+h1,h2,h3 {color:#0759A8;}
+.tarjeta {border:1px solid #d7e7f7;border-radius:19px;padding:25px;margin-bottom:22px;box-shadow:0 8px 23px rgba(7,89,168,.10);background:#FFFFFF;}
+.grid-menu {grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px;}
+.opcion {border:1px solid #d7e7f7;border-left:4px solid #0759A8;border-radius:12px;padding:15px;background:#FFFFFF;}
+.opcion:hover {background:#edf5fc;}
+.tabla-wrap {overflow-x:auto;border:1px solid #bdd6ee;border-radius:16px;}
+.tabla {border-collapse:separate;border-spacing:0;}
+.tabla th,.tabla td {padding:14px 17px;border:0;border-right:1px solid #d7e7f7;border-bottom:1px solid #d7e7f7;}
+.tabla th:last-child,.tabla td:last-child {border-right:0;}
+.tabla tbody tr:last-child td {border-bottom:0;}
+.tabla thead th {background:#0759A8;color:#FFFFFF;font-weight:bold;}
+.tabla tbody tr:nth-child(even) {background:#FFFFFF;}
+.tabla tbody tr:hover {background:#edf5fc;}
+.btn {border-radius:9px;background:#0759A8;border-color:#0759A8;}
+.btn:hover,.btn:focus {background:#FFFFFF;color:#0759A8;}
+.btn-sec {background:#FFFFFF;color:#0759A8;}
+input[type=text],input[type=password],input[type=search],input[type=number],input[type=date],input[type=tel],select,textarea {border-radius:9px;padding:10px 12px;}
+input:focus,select:focus,textarea:focus {outline:2px solid #0759A8;}
+fieldset {border-radius:12px;}
+.pie {background:#FFFFFF;border-top:1px solid #d7e7f7;}
+.bienvenida {margin-top:0;}
+.tarjeta-expedientes {padding:23px;}
+.expedientes-cabecera {display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:25px;}
+.expedientes-cabecera h2 {display:flex;align-items:center;gap:12px;margin:0;font-size:1.65rem;}
+.carpeta-icono {display:inline-flex;align-items:center;justify-content:center;background:#e6f1fb;color:#0759A8;border-radius:11px;width:63px;height:63px;font-size:2rem;}
+.contador-expedientes {background:#e6f1fb;border-radius:12px;padding:2px 13px;}
+.buscador-acceso {display:inline-flex;align-items:center;gap:14px;border:1px solid #bdd6ee;border-radius:40px;padding:11px 24px;min-width:280px;color:#0759A8;text-decoration:none;font-weight:bold;}
+.buscador-acceso span {font-size:2rem;line-height:1;}
+.buscador-acceso:hover {background:#e6f1fb;}
+.estado-expediente {display:inline-block;padding:4px 13px;border-radius:30px;background:#e4f4e8;color:#1e6b35;font-weight:bold;}
+.accion-ver {display:inline-block;border-radius:30px;background:#e6f1fb;color:#0759A8;text-decoration:none;padding:5px 18px;font-weight:bold;}
+.accion-ver:hover {background:#0759A8;color:#FFFFFF;}
+@media(max-width:900px) {.layout-sistema .barra,.layout-sistema main.contenedor,.layout-sistema .pie {margin-left:0;} .menu-lateral {position:relative;width:100%;padding:18px;} .titulo-sistema {font-size:1.2rem;margin:0 0 12px;padding:0 0 12px;} .menu-lateral .menu {flex-direction:row;flex-wrap:wrap;} .menu-lateral .menu a,.menu-lateral .btn-link {width:auto;} .layout-sistema main.contenedor {padding:25px 18px;} .barra-interna {min-height:90px;} }
+@media(max-width:600px) {.marca {font-size:1rem;gap:10px;} .marca-emblema {padding-right:10px;} .marca-emblema svg {width:44px;height:42px;} .usuario {white-space:normal;} .tarjeta {padding:16px;} .expedientes-cabecera h2 {font-size:1.2rem;} .buscador-acceso {min-width:0;width:100%;} .tabla th,.tabla td {padding:9px;} }
+@media print {.menu-lateral,.barra,.pie,.buscador-acceso {display:none!important;} .layout-sistema main.contenedor {margin:0;padding:0;} .tarjeta {box-shadow:none;} }
+
+/* ============================================================
+   IDENTIDAD VISUAL COMPARTIDA: BIENVENIDA, LOGIN Y SISTEMA
+   Se conservan todas las clases y controles existentes.
+   ============================================================ */
+:root { --rojo-institucional: #E60012; }
+.marca-emblema img {
+    display: block;
+    width: 95px;
+    height: 95px;
+    object-fit: contain;
+}
+.pagina-login .barra { background:#0759A8; }
+.pagina-login .barra-interna { justify-content:center; }
+.pagina-login main.contenedor { max-width:620px; padding:35px 20px 65px; min-height:calc(100vh - 170px); }
+.pagina-login main.contenedor > h1 { text-align:center; font-size:1.8rem; }
+.pagina-login .tarjeta-login { max-width:470px; border-radius:18px; padding:32px; box-shadow:0 12px 32px rgba(7,89,168,.12); }
+.pagina-login .tarjeta-login .btn { width:100%; }
+.pagina-bienvenida { min-height:100vh; display:flex; flex-direction:column; background:linear-gradient(135deg, #0759A8 0%, #0759A8 35%, #FFFFFF 35%, #FFFFFF 100%); color:#050505; }
+.bienvenida-contenido { display:flex; flex:1; align-items:center; justify-content:center; padding:45px 20px; }
+.bienvenida-panel { width:min(100%, 620px); text-align:center; background:#FFFFFF; padding:44px 45px 48px; border:1px solid #0759A8; border-radius:22px; box-shadow:0 18px 48px rgba(7,89,168,.18); }
+.bienvenida-logo { display:block; width:clamp(145px, 22vw, 205px); height:auto; margin:0 auto 24px; }
+.bienvenida-institucion { margin:0; color:#0759A8; font-weight:700; font-size:clamp(1.15rem, 2.4vw, 1.65rem); }
+.bienvenida-separador { display:block; width:75px; height:3px; margin:22px auto; background:#E60012; }
+.pagina-bienvenida .bienvenida-panel h1 { margin:0 0 12px; font-size:clamp(1.6rem, 3vw, 2.25rem); color:#0759A8; line-height:1.2; }
+.bienvenida-descripcion { margin:0 0 30px; font-size:1rem; }
+.bienvenida-ingresar { display:inline-flex; align-items:center; justify-content:center; gap:20px; min-height:48px; padding:12px 28px; background:#0759A8; color:#FFFFFF; border:1px solid #0759A8; border-radius:9px; text-decoration:none; font-weight:700; }
+.bienvenida-ingresar:hover, .bienvenida-ingresar:focus-visible { background:#FFFFFF; color:#0759A8; }
+.bienvenida-pie { text-align:center; padding:16px; color:#0759A8; background:#FFFFFF; font-size:.85rem; }
+@media(max-width:600px) { .bienvenida-panel { padding:30px 22px; } .pagina-login .tarjeta-login { padding:22px; } .marca-emblema img { width:48px; height:48px; } }
+@media print { .bienvenida-ingresar { display:none; } }
+
+/* ==========================================
+   MOSTRAR Y OCULTAR CONTRASEÑA
+   ========================================== */
+
+.campo-contrasena {
+    position: relative;
+    width: 100%;
+}
+
+.campo-contrasena input {
+    width: 100%;
+    padding-right: 55px;
+}
+
+.btn-ver-clave {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    transform: translateY(-50%);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+    border: none;
+    border-radius: 9px;
+
+    background: transparent;
+    color: #0759A8;
+
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-ver-clave:hover,
+.btn-ver-clave:focus-visible {
+    background: rgba(7, 89, 168, 0.08);
+}
+
+.btn-ver-clave:focus-visible {
+    outline: 2px solid #0759A8;
+    outline-offset: 2px;
+}
+
+.btn-ver-clave.clave-visible {
+    color: #E60012;
+}
+
+.campo-contrasena {
+    position: relative;
+    width: 100%;
+}
+
+.campo-contrasena input {
+    width: 100%;
+    padding-right: 55px;
+}
+
+.btn-ver-clave {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #0759A8;
+    cursor: pointer;
+}
+
+.btn-ver-clave:hover {
+    background: #e6f1fb;
+}
+
+.btn-ver-clave svg[hidden] {
+    display: none;
 }
