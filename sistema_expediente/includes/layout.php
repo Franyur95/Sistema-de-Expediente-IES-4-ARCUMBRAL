@@ -32,8 +32,9 @@ function render_header(string $titulo, ?array $usuario = null): void
 <?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
     <a href="usuarios.php" <?= $paginaActual === 'usuarios.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♙</span>Usuarios</a>
 <?php endif; ?>
-    <a href="cambiar_clave.php" <?= $paginaActual === 'cambiar_clave.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♧</span>Mi contraseña</a>
-    <form method="post" action="logout.php" class="form-inline">
+    <a href="cambiar_clave.php" <?= $paginaActual === 'cambiar_clave.php'
+     ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♧</span>Mi contraseña</a>
+   <form method="post" action="logout.php" class="form-inline">
       <?= csrf_campo() ?>
       <button type="submit" class="btn-link"><span class="nav-icon" aria-hidden="true">⇥</span>Salir</button>
     </form>

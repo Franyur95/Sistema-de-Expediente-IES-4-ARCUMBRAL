@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/includes/auth.php';
 
@@ -343,6 +342,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $st = db()->prepare($sql);
                     $st->execute($params);
 
+                    // Si había una solicitud de «olvidé mi contraseña», queda atendida.
+                    if ($clave !== '') {
+                        db()->prepare('UPDATE solicitud_clave SET atendida = 1 WHERE id_usuario = ? AND atendida = 0')
+                            ->execute([$idPost]);
+                    }
+
                     auditar_usuario_modulo(
                         'UPDATE',
                         $idPost,
@@ -571,6 +576,22 @@ $stLista->execute($paramsLista);
 
 $usuarios = $stLista->fetchAll(PDO::FETCH_ASSOC);
 
+// Solicitudes de nueva contraseña hechas desde «¿Olvidó su contraseña?».
+$solicitudesClave = [];
+if ($puedeEditar) {
+    try {
+        $solicitudesClave = db()->query(
+            'SELECT s.id_usuario, u.nombre, u.usuario, s.fecha
+             FROM solicitud_clave s
+             JOIN usuarios u ON u.id_usuario = s.id_usuario
+             WHERE s.atendida = 0
+             ORDER BY s.fecha'
+        )->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $ex) {
+        error_log('No se pudieron leer las solicitudes de contraseña: ' . $ex->getMessage());
+    }
+}
+
 
 render_header('Administración de usuarios', $usuarioActual);
 ?>
@@ -742,6 +763,21 @@ render_header('Administración de usuarios', $usuarioActual);
 
 <?php endif; ?>
 
+
+<?php if ($solicitudesClave): ?>
+<section class="tarjeta">
+    <h2>Solicitudes de nueva contraseña (<?= count($solicitudesClave) ?>)</h2>
+    <p class="nota">Entre a «Editar», escriba una contraseña temporal y entréguesela en persona. Deberá cambiarla al ingresar.</p>
+    <ul>
+<?php foreach ($solicitudesClave as $sol): ?>
+        <li>
+            <strong><?= e($sol['usuario']) ?></strong> (<?= e($sol['nombre']) ?>) · <?= e(substr((string)$sol['fecha'], 0, 16)) ?>
+            · <a href="usuarios.php?editar=<?= (int)$sol['id_usuario'] ?>">Asignar contraseña</a>
+        </li>
+<?php endforeach; ?>
+    </ul>
+</section>
+<?php endif; ?>
 
 <section class="tarjeta">
 

@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/includes/auth.php';
 
@@ -165,9 +164,8 @@ if ($error !== '') {
                 Ingresar
             </button>
         </div>
-
     </form>
-
+      <p><a href="olvide_clave.php">¿Olvidó su contraseña?</a></p>
 </section>
 
 <script src="js/mostrar_clave.js" defer></script>
