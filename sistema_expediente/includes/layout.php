@@ -29,11 +29,25 @@ function render_header(string $titulo, ?array $usuario = null): void
     <a href="buscar.php" <?= $paginaActual === 'buscar.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">⌕</span>Buscar alumnos</a>
     <a href="reportes.php" <?= $paginaActual === 'reportes.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">▤</span>Reportes</a>
 <?php endif; ?>
-<?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
-    <a href="usuarios.php" <?= $paginaActual === 'usuarios.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♙</span>Usuarios</a>
+<?php if (tiene_permiso($usuario, 'semaforo.ver')): ?>
+    <a href="semaforo.php" <?= $paginaActual === 'semaforo.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">◍</span>Semáforo</a>
 <?php endif; ?>
+<?php if (tiene_permiso($usuario, 'alertas.ver')): ?>
+    <a href="alertas.php" <?= $paginaActual === 'alertas.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">⚑</span>Alertas</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
+    <a href="usuarios.php" <?= $paginaActual === 'usuarios.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♙</span>Usuarios y permisos</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'auditoria.ver')): ?>
+    <a href="auditoria.php" <?= $paginaActual === 'auditoria.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">▦</span>Registro de auditoría</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'respaldos.ver')): ?>
+    <a href="respaldos.php" <?= $paginaActual === 'respaldos.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">⇩</span>Respaldos</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'cuenta.clave')): ?>
     <a href="cambiar_clave.php" <?= $paginaActual === 'cambiar_clave.php'
      ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">♧</span>Mi contraseña</a>
+<?php endif; ?>
    <form method="post" action="logout.php" class="form-inline">
       <?= csrf_campo() ?>
       <button type="submit" class="btn-link"><span class="nav-icon" aria-hidden="true">⇥</span>Salir</button>

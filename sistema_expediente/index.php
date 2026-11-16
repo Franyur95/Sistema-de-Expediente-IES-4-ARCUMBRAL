@@ -103,10 +103,18 @@ render_header('Inicio', $usuario);
 <?php else: ?>
 
 <section class="tarjeta">
-  <p>
-    Su usuario no tiene permiso para consultar expedientes.
-    Puede utilizar las opciones autorizadas para su rol.
-  </p>
+  <p>Seleccione una de las opciones autorizadas para su rol:</p>
+  <div class="botones">
+<?php if (tiene_permiso($usuario, 'usuarios.ver')): ?>
+    <a class="btn" href="usuarios.php">Usuarios y permisos</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'auditoria.ver')): ?>
+    <a class="btn" href="auditoria.php">Registro de auditoría</a>
+<?php endif; ?>
+<?php if (tiene_permiso($usuario, 'respaldos.ver')): ?>
+    <a class="btn" href="respaldos.php">Respaldos</a>
+<?php endif; ?>
+  </div>
 </section>
 
 <?php endif; ?>

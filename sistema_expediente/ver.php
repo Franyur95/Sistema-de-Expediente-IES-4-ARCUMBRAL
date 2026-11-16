@@ -3,6 +3,7 @@ require_once __DIR__ . '/includes/auth.php';
 
 require_once __DIR__ . '/includes/estudiantes.php';
 require_once __DIR__ . '/includes/academico.php';
+require_once __DIR__ . '/includes/semaforo.php';
 
 $usuario = require_login();
 exigir_permiso($usuario, 'expedientes.ver');
@@ -109,6 +110,9 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
 
 <section class="tarjeta">
     <h2>Documentación</h2>
+    <?php $sem = tiene_permiso($usuario, 'semaforo.ver') ? semaforo_estudiante($id) : null; if ($sem): ?>
+        <p class="semaforo-fila">Estado de la documentación: <?= semaforo_insignia((string)$sem['semaforo']) ?> <small><?= e(semaforo_detalle($sem)) ?></small></p>
+    <?php endif; ?>
 
     <?php if ($tipos): ?>
 

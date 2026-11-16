@@ -310,3 +310,18 @@ fieldset {border-radius:12px;}
 .btn-ver-clave svg[hidden] {
     display: none;
 }
+
+
+/* Semáforo de documentación y alertas */
+.semaforo { display: inline-flex; align-items: center; gap: 6px; font-weight: bold; font-size: .85rem; border-radius: 12px; padding: 2px 10px; }
+.semaforo-punto { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+.semaforo-rojo { background: #fbe9e7; color: #a4231b; }
+.semaforo-rojo .semaforo-punto { background: #a4231b; }
+.semaforo-amarillo { background: #fff4d6; color: #7a5800; }
+.semaforo-amarillo .semaforo-punto { background: #e1b12c; }
+.semaforo-verde { background: #e4f4e8; color: #1e6b35; }
+.semaforo-verde .semaforo-punto { background: #1e6b35; }
+.resumen-semaforo { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 14px; }
+.resumen-item { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #c9d1d9; border-radius: 8px; padding: 8px 14px; text-decoration: none; color: #22303c; }
+.resumen-item.activo { border-color: #1f4e79; background: #eaf1f8; }
+.semaforo-fila { margin: 0 0 10px; }

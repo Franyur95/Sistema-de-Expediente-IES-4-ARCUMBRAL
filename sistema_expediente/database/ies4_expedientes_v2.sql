@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-11-2026 a las 22:36:39
+-- Tiempo de generación: 17-11-2026 a las 00:03:30
 -- Versión del servidor: 10.11.16-MariaDB
 -- Versión de PHP: 8.5.12
 
@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `auditoria`
 --
 
+DROP TABLE IF EXISTS `auditoria`;
 CREATE TABLE `auditoria` (
   `id_auditoria` bigint(20) UNSIGNED NOT NULL,
   `id_usuario` int(10) UNSIGNED DEFAULT NULL,
@@ -263,7 +264,30 @@ INSERT INTO `auditoria` (`id_auditoria`, `id_usuario`, `tabla`, `registro_id`, `
 (215, 1, 'usuarios', 4, 'UPDATE', NULL, '{\"usuario\":\"preceptora.tarde\",\"rol\":\"preceptora\",\"activo\":1}', 'Actualización de usuario desde administración', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36', '2026-11-14 18:34:12'),
 (216, 1, 'usuarios', 4, 'UPDATE', NULL, '{\"usuario\":\"preceptora.tarde\",\"rol\":\"preceptora\",\"activo\":1}', 'Actualización de usuario desde administración', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36', '2026-11-14 18:34:23'),
 (217, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-14 18:34:51'),
-(218, 4, 'usuarios', NULL, 'UPDATE', NULL, NULL, 'Cambio de contraseña', NULL, NULL, '2026-11-14 18:35:36');
+(218, 4, 'usuarios', NULL, 'UPDATE', NULL, NULL, 'Cambio de contraseña', NULL, NULL, '2026-11-14 18:35:36'),
+(219, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 13:19:58'),
+(220, 1, 'estudiantes', 6, 'INSERT', NULL, NULL, 'Alta de expediente: Expediente creado', NULL, NULL, '2026-11-16 13:56:11'),
+(221, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 13:59:59'),
+(222, 3, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:02:16'),
+(223, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:04:23'),
+(224, 3, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:07:45'),
+(225, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:10:03'),
+(226, 2, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:10:25'),
+(227, 2, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:14:37'),
+(228, 3, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:14:43'),
+(229, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:16:51'),
+(230, 1, 'usuarios', 4, 'UPDATE', NULL, '{\"usuario\":\"preceptora.tarde\",\"rol\":\"preceptora\",\"activo\":1}', 'Actualización de usuario desde administración', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36', '2026-11-16 14:17:07'),
+(231, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:17:13'),
+(232, 4, 'usuarios', NULL, 'UPDATE', NULL, NULL, 'Cambio de contraseña', NULL, NULL, '2026-11-16 14:21:01'),
+(233, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:22:38'),
+(234, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:46:52'),
+(235, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:48:02'),
+(236, 3, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:50:56'),
+(237, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 14:56:25'),
+(238, 4, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 19:47:44'),
+(239, 1, 'estudiantes', NULL, 'LOGIN', NULL, NULL, 'Inicio de sesión', NULL, NULL, '2026-11-16 19:48:12'),
+(240, 1, 'sistema', NULL, 'BACKUP', NULL, NULL, 'Copia de seguridad manual: respaldo_20261116_194847.sql', NULL, NULL, '2026-11-16 19:48:48'),
+(241, 1, 'sistema', NULL, 'EXPORT', NULL, NULL, 'Descarga de la copia respaldo_20261116_194847.sql', NULL, NULL, '2026-11-16 19:48:57');
 
 -- --------------------------------------------------------
 
@@ -271,6 +295,7 @@ INSERT INTO `auditoria` (`id_auditoria`, `id_usuario`, `tabla`, `registro_id`, `
 -- Estructura de tabla para la tabla `carreras`
 --
 
+DROP TABLE IF EXISTS `carreras`;
 CREATE TABLE `carreras` (
   `id_carrera` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(180) NOT NULL,
@@ -292,6 +317,7 @@ INSERT INTO `carreras` (`id_carrera`, `nombre`, `turno`, `resolucion`, `activa`)
 -- Estructura de tabla para la tabla `correlatividades`
 --
 
+DROP TABLE IF EXISTS `correlatividades`;
 CREATE TABLE `correlatividades` (
   `id_materia` int(10) UNSIGNED NOT NULL COMMENT 'Materia que se quiere cursar o rendir',
   `id_requerida` int(10) UNSIGNED NOT NULL COMMENT 'Materia que debe estar regular o aprobada',
@@ -507,6 +533,7 @@ INSERT INTO `correlatividades` (`id_materia`, `id_requerida`, `tipo_requisito`, 
 -- Estructura de tabla para la tabla `cursadas`
 --
 
+DROP TABLE IF EXISTS `cursadas`;
 CREATE TABLE `cursadas` (
   `id_cursada` bigint(20) UNSIGNED NOT NULL,
   `id_estudiante` int(10) UNSIGNED NOT NULL,
@@ -567,6 +594,7 @@ INSERT INTO `cursadas` (`id_cursada`, `id_estudiante`, `id_materia`, `id_submate
 --
 -- Disparadores `cursadas`
 --
+DROP TRIGGER IF EXISTS `trg_cursadas_regimen_bi`;
 DELIMITER $$
 CREATE TRIGGER `trg_cursadas_regimen_bi` BEFORE INSERT ON `cursadas` FOR EACH ROW BEGIN
   IF NEW.caracter = 'regular' AND (SELECT regimen_acreditacion FROM materias WHERE id_materia = NEW.id_materia) = 'promocion' THEN
@@ -578,6 +606,7 @@ CREATE TRIGGER `trg_cursadas_regimen_bi` BEFORE INSERT ON `cursadas` FOR EACH RO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_cursadas_regimen_bu`;
 DELIMITER $$
 CREATE TRIGGER `trg_cursadas_regimen_bu` BEFORE UPDATE ON `cursadas` FOR EACH ROW BEGIN
   IF NOT (NEW.caracter <=> OLD.caracter) THEN
@@ -591,6 +620,7 @@ CREATE TRIGGER `trg_cursadas_regimen_bu` BEFORE UPDATE ON `cursadas` FOR EACH RO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_cursadas_submateria_bi`;
 DELIMITER $$
 CREATE TRIGGER `trg_cursadas_submateria_bi` BEFORE INSERT ON `cursadas` FOR EACH ROW BEGIN
   IF NEW.id_submateria IS NULL AND EXISTS (SELECT 1 FROM submaterias WHERE id_materia = NEW.id_materia) THEN
@@ -606,6 +636,7 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `documentacion_estudiante`
 --
 
+DROP TABLE IF EXISTS `documentacion_estudiante`;
 CREATE TABLE `documentacion_estudiante` (
   `id_documento` bigint(20) UNSIGNED NOT NULL,
   `id_estudiante` int(10) UNSIGNED NOT NULL,
@@ -641,7 +672,11 @@ INSERT INTO `documentacion_estudiante` (`id_documento`, `id_estudiante`, `id_tip
 (33, 5, 1, '2026', 1, '2026-04-05', NULL, NULL),
 (34, 5, 2, '2026', 1, '2026-04-05', NULL, NULL),
 (35, 5, 3, '2026', 1, '2026-04-05', NULL, NULL),
-(36, 5, 4, '2026', 1, '2026-04-06', NULL, NULL);
+(36, 5, 4, '2026', 1, '2026-04-06', NULL, NULL),
+(37, 6, 1, '2026', 1, '2026-11-16', NULL, NULL),
+(38, 6, 2, '2026', 1, '2026-11-16', NULL, NULL),
+(39, 6, 3, '2026', 1, '2026-11-16', NULL, NULL),
+(40, 6, 4, '2026', 1, '2026-11-16', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -649,6 +684,7 @@ INSERT INTO `documentacion_estudiante` (`id_documento`, `id_estudiante`, `id_tip
 -- Estructura de tabla para la tabla `estudiantes`
 --
 
+DROP TABLE IF EXISTS `estudiantes`;
 CREATE TABLE `estudiantes` (
   `id_estudiante` int(10) UNSIGNED NOT NULL,
   `tipo_documento` enum('DNI','LC','LE') NOT NULL DEFAULT 'DNI',
@@ -680,11 +716,13 @@ INSERT INTO `estudiantes` (`id_estudiante`, `tipo_documento`, `dni`, `apellido`,
 (2, 'DNI', '42324451', 'Flores', 'Lujan', '2004-03-20', 'Palpala', 'Avenida Congreso n 444', '3884728301', 'Tecnica en informatica', 'EET 1', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-03 19:02:05'),
 (3, 'DNI', '392380103', 'Perez', 'Gerardo', '1997-06-12', 'Palpala', 'Avenida Congreso n 432', '3885249858', 'Tecnica en electromecanica', 'EET 1', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-05 19:18:42'),
 (4, 'DNI', '40927770', 'Cruz', 'Franco Omar', '1998-01-25', 'Palpala', 'puesto viejo 12', '3884682114', 'computacion', 'Enet n°1', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-06 17:05:59'),
-(5, 'DNI', '381234567', 'Cruz', 'Omar Carlos', '1991-09-30', 'Palpala', 'Pilar bermudez 12', '3884332343', 'Perito mercantil', 'Escuela Comercial n1 \"Dr. Manuel Belgrano\"', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-07 11:56:33');
+(5, 'DNI', '381234567', 'Cruz', 'Omar Carlos', '1991-09-30', 'Palpala', 'Pilar bermudez 12', '3884332343', 'Perito mercantil', 'Escuela Comercial n1 \"Dr. Manuel Belgrano\"', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-07 11:56:33'),
+(6, 'DNI', '343434134', 'sdfgf', 'dasd', '1998-12-12', 'Plapala', 'refdfsdf', '434234', '42432fsfsdfsd', 'sdfsdfsdfsd', '2026', 1, 1, 'activo', NULL, NULL, NULL, '2026-11-16 13:56:11');
 
 --
 -- Disparadores `estudiantes`
 --
+DROP TRIGGER IF EXISTS `trg_estudiantes_ad`;
 DELIMITER $$
 CREATE TRIGGER `trg_estudiantes_ad` AFTER DELETE ON `estudiantes` FOR EACH ROW BEGIN
   INSERT INTO auditoria (id_usuario, tabla, registro_id, accion, datos_anteriores, motivo, fecha)
@@ -694,6 +732,7 @@ CREATE TRIGGER `trg_estudiantes_ad` AFTER DELETE ON `estudiantes` FOR EACH ROW B
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_estudiantes_bd`;
 DELIMITER $$
 CREATE TRIGGER `trg_estudiantes_bd` BEFORE DELETE ON `estudiantes` FOR EACH ROW BEGIN
   IF EXISTS (SELECT 1 FROM cursadas WHERE id_estudiante = OLD.id_estudiante)
@@ -711,6 +750,7 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `examenes_finales`
 --
 
+DROP TABLE IF EXISTS `examenes_finales`;
 CREATE TABLE `examenes_finales` (
   `id_examen` bigint(20) UNSIGNED NOT NULL,
   `id_estudiante` int(10) UNSIGNED NOT NULL,
@@ -740,6 +780,7 @@ INSERT INTO `examenes_finales` (`id_examen`, `id_estudiante`, `id_materia`, `id_
 --
 -- Disparadores `examenes_finales`
 --
+DROP TRIGGER IF EXISTS `trg_examenes_regimen_bi`;
 DELIMITER $$
 CREATE TRIGGER `trg_examenes_regimen_bi` BEFORE INSERT ON `examenes_finales` FOR EACH ROW BEGIN
   IF (SELECT regimen_acreditacion FROM materias WHERE id_materia = NEW.id_materia) = 'promocion' THEN
@@ -748,6 +789,7 @@ CREATE TRIGGER `trg_examenes_regimen_bi` BEFORE INSERT ON `examenes_finales` FOR
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_examenes_submateria_bi`;
 DELIMITER $$
 CREATE TRIGGER `trg_examenes_submateria_bi` BEFORE INSERT ON `examenes_finales` FOR EACH ROW BEGIN
   IF NEW.id_submateria IS NULL AND EXISTS (SELECT 1 FROM submaterias WHERE id_materia = NEW.id_materia) THEN
@@ -763,6 +805,7 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `inscripciones_curso`
 --
 
+DROP TABLE IF EXISTS `inscripciones_curso`;
 CREATE TABLE `inscripciones_curso` (
   `id_inscripcion` int(10) UNSIGNED NOT NULL,
   `id_estudiante` int(10) UNSIGNED NOT NULL,
@@ -779,7 +822,8 @@ CREATE TABLE `inscripciones_curso` (
 INSERT INTO `inscripciones_curso` (`id_inscripcion`, `id_estudiante`, `fecha_inscripcion`, `curso`, `condicion`, `observaciones`) VALUES
 (1, 3, '2026-11-05', 1, 'cursar', NULL),
 (2, 4, '2026-11-06', 1, 'cursar', NULL),
-(3, 5, '2026-04-04', 1, 'cursar', NULL);
+(3, 5, '2026-04-04', 1, 'cursar', NULL),
+(4, 6, '2026-11-16', 1, 'cursar', NULL);
 
 -- --------------------------------------------------------
 
@@ -787,6 +831,7 @@ INSERT INTO `inscripciones_curso` (`id_inscripcion`, `id_estudiante`, `fecha_ins
 -- Estructura de tabla para la tabla `materias`
 --
 
+DROP TABLE IF EXISTS `materias`;
 CREATE TABLE `materias` (
   `id_materia` int(10) UNSIGNED NOT NULL,
   `id_plan` int(10) UNSIGNED NOT NULL,
@@ -847,6 +892,7 @@ INSERT INTO `materias` (`id_materia`, `id_plan`, `codigo`, `nombre`, `anio`, `or
 -- Estructura de tabla para la tabla `permisos`
 --
 
+DROP TABLE IF EXISTS `permisos`;
 CREATE TABLE `permisos` (
   `id_permiso` int(10) UNSIGNED NOT NULL,
   `codigo` varchar(60) NOT NULL,
@@ -868,7 +914,12 @@ INSERT INTO `permisos` (`id_permiso`, `codigo`, `descripcion`) VALUES
 (8, 'usuarios.editar', 'Crear y modificar usuarios'),
 (9, 'auditoria.ver', 'Ver el historial de cambios'),
 (10, 'reportes.ver', 'Ver e imprimir/exportar expedientes'),
-(11, 'backups.ejecutar', 'Generar copias de seguridad');
+(11, 'backups.ejecutar', 'Generar copias de seguridad'),
+(13, 'semaforo.ver', 'Ver el semáforo de documentación'),
+(14, 'alertas.ver', 'Ver alertas'),
+(15, 'respaldos.ver', 'Ver copias de seguridad'),
+(16, 'respaldos.editar', 'Generar copias de seguridad'),
+(17, 'cuenta.clave', 'Mostrar «Mi contraseña» en el menú');
 
 -- --------------------------------------------------------
 
@@ -876,6 +927,7 @@ INSERT INTO `permisos` (`id_permiso`, `codigo`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `planes`
 --
 
+DROP TABLE IF EXISTS `planes`;
 CREATE TABLE `planes` (
   `id_plan` int(10) UNSIGNED NOT NULL,
   `id_carrera` int(10) UNSIGNED NOT NULL,
@@ -898,6 +950,7 @@ INSERT INTO `planes` (`id_plan`, `id_carrera`, `nombre`, `anio_vigencia`, `resol
 -- Estructura de tabla para la tabla `rol_permiso`
 --
 
+DROP TABLE IF EXISTS `rol_permiso`;
 CREATE TABLE `rol_permiso` (
   `rol` varchar(30) NOT NULL,
   `id_permiso` int(10) UNSIGNED NOT NULL,
@@ -910,24 +963,20 @@ CREATE TABLE `rol_permiso` (
 --
 
 INSERT INTO `rol_permiso` (`rol`, `id_permiso`, `puede_ver`, `puede_editar`) VALUES
-('admin', 1, 1, 1),
-('admin', 2, 1, 1),
 ('admin', 3, 1, 1),
 ('admin', 4, 1, 1),
-('admin', 5, 1, 1),
-('admin', 6, 1, 1),
-('admin', 7, 1, 1),
+('admin', 7, 1, 0),
 ('admin', 8, 1, 1),
-('admin', 9, 1, 1),
+('admin', 9, 1, 0),
 ('admin', 10, 1, 1),
 ('admin', 11, 1, 1),
+('admin', 15, 1, 0),
+('admin', 16, 1, 1),
+('admin', 17, 1, 0),
 ('coordinadora', 1, 1, 0),
-('coordinadora', 2, 1, 1),
 ('coordinadora', 3, 1, 0),
 ('coordinadora', 4, 1, 1),
 ('coordinadora', 5, 1, 0),
-('coordinadora', 6, 1, 1),
-('coordinadora', 9, 1, 0),
 ('coordinadora', 10, 1, 0),
 ('coordinadora', 11, 1, 0),
 ('preceptora', 1, 1, 0),
@@ -936,17 +985,14 @@ INSERT INTO `rol_permiso` (`rol`, `id_permiso`, `puede_ver`, `puede_editar`) VAL
 ('preceptora', 4, 1, 1),
 ('preceptora', 5, 1, 0),
 ('preceptora', 6, 1, 1),
-('preceptora', 9, 1, 0),
 ('preceptora', 10, 1, 0),
 ('preceptora', 11, 1, 0),
+('preceptora', 13, 1, 0),
+('preceptora', 14, 1, 0),
 ('vicerrectora', 1, 1, 0),
-('vicerrectora', 2, 1, 0),
 ('vicerrectora', 3, 1, 0),
 ('vicerrectora', 4, 1, 0),
 ('vicerrectora', 5, 1, 0),
-('vicerrectora', 6, 1, 0),
-('vicerrectora', 7, 1, 0),
-('vicerrectora', 9, 1, 0),
 ('vicerrectora', 10, 1, 0),
 ('vicerrectora', 11, 1, 0);
 
@@ -956,6 +1002,7 @@ INSERT INTO `rol_permiso` (`rol`, `id_permiso`, `puede_ver`, `puede_editar`) VAL
 -- Estructura de tabla para la tabla `solicitud_clave`
 --
 
+DROP TABLE IF EXISTS `solicitud_clave`;
 CREATE TABLE `solicitud_clave` (
   `id_solicitud` int(11) NOT NULL,
   `id_usuario` int(10) UNSIGNED NOT NULL,
@@ -968,7 +1015,8 @@ CREATE TABLE `solicitud_clave` (
 --
 
 INSERT INTO `solicitud_clave` (`id_solicitud`, `id_usuario`, `fecha`, `atendida`) VALUES
-(1, 4, '2026-11-14 18:15:25', 1);
+(1, 4, '2026-11-14 18:15:25', 1),
+(2, 4, '2026-11-16 14:16:45', 1);
 
 -- --------------------------------------------------------
 
@@ -976,6 +1024,7 @@ INSERT INTO `solicitud_clave` (`id_solicitud`, `id_usuario`, `fecha`, `atendida`
 -- Estructura de tabla para la tabla `submaterias`
 --
 
+DROP TABLE IF EXISTS `submaterias`;
 CREATE TABLE `submaterias` (
   `id_submateria` int(10) UNSIGNED NOT NULL,
   `id_materia` int(10) UNSIGNED NOT NULL,
@@ -1002,6 +1051,7 @@ INSERT INTO `submaterias` (`id_submateria`, `id_materia`, `nombre`, `orden`) VAL
 -- Estructura de tabla para la tabla `tipos_documento`
 --
 
+DROP TABLE IF EXISTS `tipos_documento`;
 CREATE TABLE `tipos_documento` (
   `id_tipo` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(120) NOT NULL,
@@ -1028,6 +1078,7 @@ INSERT INTO `tipos_documento` (`id_tipo`, `nombre`, `obligatorio`, `vence`, `dia
 -- Estructura de tabla para la tabla `tramites`
 --
 
+DROP TABLE IF EXISTS `tramites`;
 CREATE TABLE `tramites` (
   `id_tramite` bigint(20) UNSIGNED NOT NULL,
   `id_estudiante` int(10) UNSIGNED NOT NULL,
@@ -1046,6 +1097,7 @@ CREATE TABLE `tramites` (
 --
 -- Disparadores `tramites`
 --
+DROP TRIGGER IF EXISTS `trg_tramites_bi`;
 DELIMITER $$
 CREATE TRIGGER `trg_tramites_bi` BEFORE INSERT ON `tramites` FOR EACH ROW BEGIN
   IF NEW.fecha_limite IS NULL AND NEW.tipo IN ('asimilacion', 'equivalencia') THEN
@@ -1071,6 +1123,7 @@ CREATE TRIGGER `trg_tramites_bi` BEFORE INSERT ON `tramites` FOR EACH ROW BEGIN
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `trg_tramites_bu`;
 DELIMITER $$
 CREATE TRIGGER `trg_tramites_bu` BEFORE UPDATE ON `tramites` FOR EACH ROW BEGIN
   IF NEW.fecha_limite IS NOT NULL AND NEW.fecha_limite < NEW.fecha_solicitud THEN
@@ -1101,6 +1154,7 @@ DELIMITER ;
 -- Estructura de tabla para la tabla `tramite_materias`
 --
 
+DROP TABLE IF EXISTS `tramite_materias`;
 CREATE TABLE `tramite_materias` (
   `id_tramite` bigint(20) UNSIGNED NOT NULL,
   `id_materia` int(10) UNSIGNED NOT NULL
@@ -1112,6 +1166,7 @@ CREATE TABLE `tramite_materias` (
 -- Estructura de tabla para la tabla `usuarios`
 --
 
+DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id_usuario` int(10) UNSIGNED NOT NULL,
   `nombre` varchar(120) NOT NULL,
@@ -1131,16 +1186,7 @@ INSERT INTO `usuarios` (`id_usuario`, `nombre`, `usuario`, `clave_hash`, `rol`, 
 (1, 'Administrador del Sistema', 'admin', '$2y$12$BP/S9HmM73ciw3tpibuqGebwKkH5zBLZ1mSIC/bJ.iJ.mck1jGb1G', 'admin', NULL, 1, 0),
 (2, 'Vicerrectora', 'vicerrectora', '$2y$12$K/XmT/LPLeijnuTSE5EZue2PCP5vaSpeGS4NQ80SEgg6tQttk3EpO', 'vicerrectora', NULL, 1, 0),
 (3, 'Coordinadora de Educación Física', 'coordinadora', '$2y$12$hrnzwW2mhB0lmgeFb.TfKOjUDdWVeTM/o.I3dRb9DhiUtPy8a4q22', 'coordinadora', NULL, 1, 0),
-(4, 'Preceptora Turno Tarde', 'preceptora.tarde', '$2y$12$z8vUPlyaVoRuev4TdlKEWe/zVNg/iuOSVjwQWUnAMN.Q5SBIRijVS', 'preceptora', 1, 1, 0);
-
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `v_alertas`
--- (Véase abajo para la vista actual)
---
-CREATE TABLE `v_alertas` (
-);
+(4, 'Preceptora Turno Tarde', 'preceptora.tarde', '$2y$12$Pj7WiN23xHQqq4XnVLwbx.1y.3H9K61ozzFealPnp.KuhAlNqgBKW', 'preceptora', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1148,6 +1194,7 @@ CREATE TABLE `v_alertas` (
 -- Estructura Stand-in para la vista `v_correlatividades_estado`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_correlatividades_estado`;
 CREATE TABLE `v_correlatividades_estado` (
 `id_estudiante` int(10) unsigned
 ,`apellido` varchar(100)
@@ -1169,6 +1216,7 @@ CREATE TABLE `v_correlatividades_estado` (
 -- Estructura Stand-in para la vista `v_documentacion_estado`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_documentacion_estado`;
 CREATE TABLE `v_documentacion_estado` (
 `id_estudiante` int(10) unsigned
 ,`apellido` varchar(100)
@@ -1189,6 +1237,7 @@ CREATE TABLE `v_documentacion_estado` (
 -- Estructura Stand-in para la vista `v_documentacion_pendiente`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_documentacion_pendiente`;
 CREATE TABLE `v_documentacion_pendiente` (
 `id_estudiante` int(10) unsigned
 ,`apellido` varchar(100)
@@ -1206,6 +1255,7 @@ CREATE TABLE `v_documentacion_pendiente` (
 -- Estructura Stand-in para la vista `v_materia_aprobada`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_materia_aprobada`;
 CREATE TABLE `v_materia_aprobada` (
 `id_estudiante` int(10) unsigned
 ,`id_materia` int(10) unsigned
@@ -1217,6 +1267,7 @@ CREATE TABLE `v_materia_aprobada` (
 -- Estructura Stand-in para la vista `v_semaforo_documentacion`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_semaforo_documentacion`;
 CREATE TABLE `v_semaforo_documentacion` (
 `id_estudiante` int(10) unsigned
 ,`apellido` varchar(100)
@@ -1237,6 +1288,7 @@ CREATE TABLE `v_semaforo_documentacion` (
 -- Estructura Stand-in para la vista `v_situacion_academica`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_situacion_academica`;
 CREATE TABLE `v_situacion_academica` (
 `id_estudiante` int(10) unsigned
 ,`apellido` varchar(100)
@@ -1258,6 +1310,7 @@ CREATE TABLE `v_situacion_academica` (
 -- Estructura Stand-in para la vista `v_tramites_pendientes`
 -- (Véase abajo para la vista actual)
 --
+DROP VIEW IF EXISTS `v_tramites_pendientes`;
 CREATE TABLE `v_tramites_pendientes` (
 `id_tramite` bigint(20) unsigned
 ,`id_estudiante` int(10) unsigned
@@ -1429,7 +1482,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `auditoria`
 --
 ALTER TABLE `auditoria`
-  MODIFY `id_auditoria` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=219;
+  MODIFY `id_auditoria` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=242;
 
 --
 -- AUTO_INCREMENT de la tabla `carreras`
@@ -1447,13 +1500,13 @@ ALTER TABLE `cursadas`
 -- AUTO_INCREMENT de la tabla `documentacion_estudiante`
 --
 ALTER TABLE `documentacion_estudiante`
-  MODIFY `id_documento` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id_documento` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT de la tabla `estudiantes`
 --
 ALTER TABLE `estudiantes`
-  MODIFY `id_estudiante` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_estudiante` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `examenes_finales`
@@ -1465,7 +1518,7 @@ ALTER TABLE `examenes_finales`
 -- AUTO_INCREMENT de la tabla `inscripciones_curso`
 --
 ALTER TABLE `inscripciones_curso`
-  MODIFY `id_inscripcion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_inscripcion` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `materias`
@@ -1477,7 +1530,7 @@ ALTER TABLE `materias`
 -- AUTO_INCREMENT de la tabla `permisos`
 --
 ALTER TABLE `permisos`
-  MODIFY `id_permiso` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_permiso` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `planes`
@@ -1489,7 +1542,7 @@ ALTER TABLE `planes`
 -- AUTO_INCREMENT de la tabla `solicitud_clave`
 --
 ALTER TABLE `solicitud_clave`
-  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_solicitud` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `submaterias`
@@ -1518,18 +1571,11 @@ ALTER TABLE `usuarios`
 -- --------------------------------------------------------
 
 --
--- Estructura para la vista `v_alertas`
---
-DROP TABLE IF EXISTS `v_alertas`;
--- Error leyendo la estructura de la tabla ies4_expedientes_v2.v_alertas: #1271 - Mezcla ilegal de cotejos (collations) para la operación &#039;UNION&#039;
-
--- --------------------------------------------------------
-
---
 -- Estructura para la vista `v_correlatividades_estado`
 --
 DROP TABLE IF EXISTS `v_correlatividades_estado`;
 
+DROP VIEW IF EXISTS `v_correlatividades_estado`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_correlatividades_estado`  AS SELECT `s`.`id_estudiante` AS `id_estudiante`, `s`.`apellido` AS `apellido`, `s`.`nombre` AS `nombre`, `s`.`dni` AS `dni`, `co`.`id_materia` AS `id_materia_objetivo`, `m`.`nombre` AS `materia_objetivo`, `co`.`tipo_requisito` AS `tipo_requisito`, `co`.`condicion` AS `condicion`, `co`.`id_requerida` AS `id_materia_requerida`, `r`.`nombre` AS `materia_requerida`, `s`.`estado_materia` AS `estado_requerida`, CASE WHEN `co`.`condicion` = 'aprobada' AND `s`.`estado_materia` = 'aprobada' THEN 1 WHEN `co`.`condicion` = 'regular' AND `s`.`estado_materia` in ('regular','aprobada') THEN 1 ELSE 0 END AS `cumple` FROM (((`v_situacion_academica` `s` join `correlatividades` `co` on(`co`.`id_requerida` = `s`.`id_materia`)) join `materias` `m` on(`m`.`id_materia` = `co`.`id_materia`)) join `materias` `r` on(`r`.`id_materia` = `co`.`id_requerida`)) ;
 
 -- --------------------------------------------------------
@@ -1539,6 +1585,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_documentacion_estado`;
 
+DROP VIEW IF EXISTS `v_documentacion_estado`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_documentacion_estado`  AS SELECT `e`.`id_estudiante` AS `id_estudiante`, `e`.`apellido` AS `apellido`, `e`.`nombre` AS `nombre`, `e`.`dni` AS `dni`, `e`.`id_carrera` AS `id_carrera`, `e`.`anio_ingreso` AS `anio_ingreso`, `t`.`id_tipo` AS `id_tipo`, `t`.`nombre` AS `documento`, `t`.`vence` AS `vence`, CASE WHEN coalesce(`d`.`cualquiera`,0) = 0 THEN 'falta' WHEN `t`.`vence` = 0 THEN 'vigente' WHEN `d`.`este_anio` = 1 THEN CASE WHEN curdate() >= str_to_date(concat(year(curdate()),'-12-31'),'%Y-%m-%d') - interval `t`.`dias_alerta` day THEN 'por_vencer' ELSE 'vigente' END ELSE 'vencido' END AS `estado`, CASE WHEN `t`.`vence` = 1 AND `d`.`este_anio` = 1 THEN str_to_date(concat(year(curdate()),'-12-31'),'%Y-%m-%d') END AS `vence_el` FROM ((`estudiantes` `e` join `tipos_documento` `t` on(`t`.`obligatorio` = 1 and `t`.`activo` = 1)) left join (select `documentacion_estudiante`.`id_estudiante` AS `id_estudiante`,`documentacion_estudiante`.`id_tipo` AS `id_tipo`,max(`documentacion_estudiante`.`presentado` = 1) AS `cualquiera`,max(`documentacion_estudiante`.`presentado` = 1 and `documentacion_estudiante`.`anio_lectivo` = year(curdate())) AS `este_anio` from `documentacion_estudiante` group by `documentacion_estudiante`.`id_estudiante`,`documentacion_estudiante`.`id_tipo`) `d` on(`d`.`id_estudiante` = `e`.`id_estudiante` and `d`.`id_tipo` = `t`.`id_tipo`)) WHERE `e`.`estado` = 'activo' ;
 
 -- --------------------------------------------------------
@@ -1548,6 +1595,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_documentacion_pendiente`;
 
+DROP VIEW IF EXISTS `v_documentacion_pendiente`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_documentacion_pendiente`  AS SELECT `e`.`id_estudiante` AS `id_estudiante`, `e`.`apellido` AS `apellido`, `e`.`nombre` AS `nombre`, `e`.`dni` AS `dni`, `e`.`id_carrera` AS `id_carrera`, `t`.`id_tipo` AS `id_tipo`, `t`.`nombre` AS `documento`, CASE WHEN exists(select 1 from `documentacion_estudiante` `d2` where `d2`.`id_estudiante` = `e`.`id_estudiante` AND `d2`.`id_tipo` = `t`.`id_tipo` AND `d2`.`presentado` = 1 limit 1) THEN 'vencido' ELSE 'falta' END AS `situacion` FROM ((`estudiantes` `e` join `tipos_documento` `t` on(`t`.`obligatorio` = 1 and `t`.`activo` = 1)) left join `documentacion_estudiante` `d` on(`d`.`id_estudiante` = `e`.`id_estudiante` and `d`.`id_tipo` = `t`.`id_tipo` and (`t`.`vence` = 0 or `d`.`anio_lectivo` = year(curdate())))) WHERE `e`.`estado` = 'activo' AND (`d`.`id_documento` is null OR `d`.`presentado` = 0) ;
 
 -- --------------------------------------------------------
@@ -1557,6 +1605,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_materia_aprobada`;
 
+DROP VIEW IF EXISTS `v_materia_aprobada`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_materia_aprobada`  AS SELECT `x`.`id_estudiante` AS `id_estudiante`, `x`.`id_materia` AS `id_materia` FROM `examenes_finales` AS `x` WHERE `x`.`id_submateria` is null AND `x`.`estado` = 'presente' AND `x`.`nota` >= 4 GROUP BY `x`.`id_estudiante`, `x`.`id_materia`union select `x`.`id_estudiante` AS `id_estudiante`,`x`.`id_materia` AS `id_materia` from `examenes_finales` `x` where `x`.`id_submateria` is not null and `x`.`estado` = 'presente' and `x`.`nota` >= 4 group by `x`.`id_estudiante`,`x`.`id_materia` having count(distinct `x`.`id_submateria`) = (select count(0) from `submaterias` `s` where `s`.`id_materia` = `x`.`id_materia`) union select `t`.`id_estudiante` AS `id_estudiante`,`tm`.`id_materia` AS `id_materia` from (`tramites` `t` join `tramite_materias` `tm` on(`tm`.`id_tramite` = `t`.`id_tramite`)) where `t`.`estado` = 'resuelto' and `t`.`tipo` in ('equivalencia','asimilacion') union select `c`.`id_estudiante` AS `id_estudiante`,`c`.`id_materia` AS `id_materia` from `cursadas` `c` where `c`.`caracter` = 'promocional' and `c`.`id_submateria` is null union select `c`.`id_estudiante` AS `id_estudiante`,`c`.`id_materia` AS `id_materia` from `cursadas` `c` where `c`.`caracter` = 'promocional' and `c`.`id_submateria` is not null group by `c`.`id_estudiante`,`c`.`id_materia` having count(distinct `c`.`id_submateria`) = (select count(0) from `submaterias` `s` where `s`.`id_materia` = `c`.`id_materia`)  ;
 
 -- --------------------------------------------------------
@@ -1566,6 +1615,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_semaforo_documentacion`;
 
+DROP VIEW IF EXISTS `v_semaforo_documentacion`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_semaforo_documentacion`  AS SELECT `v_documentacion_estado`.`id_estudiante` AS `id_estudiante`, `v_documentacion_estado`.`apellido` AS `apellido`, `v_documentacion_estado`.`nombre` AS `nombre`, `v_documentacion_estado`.`dni` AS `dni`, `v_documentacion_estado`.`id_carrera` AS `id_carrera`, count(0) AS `obligatorios`, sum(`v_documentacion_estado`.`estado` in ('vigente','por_vencer')) AS `presentados`, sum(`v_documentacion_estado`.`estado` = 'falta') AS `faltan`, sum(`v_documentacion_estado`.`estado` = 'vencido') AS `vencidos`, sum(`v_documentacion_estado`.`estado` = 'por_vencer') AS `por_vencer`, CASE WHEN sum(`v_documentacion_estado`.`estado` in ('falta','vencido')) > 0 THEN 'rojo' WHEN sum(`v_documentacion_estado`.`estado` = 'por_vencer') > 0 THEN 'amarillo' ELSE 'verde' END AS `semaforo` FROM `v_documentacion_estado` GROUP BY `v_documentacion_estado`.`id_estudiante`, `v_documentacion_estado`.`apellido`, `v_documentacion_estado`.`nombre`, `v_documentacion_estado`.`dni`, `v_documentacion_estado`.`id_carrera` ;
 
 -- --------------------------------------------------------
@@ -1575,6 +1625,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_situacion_academica`;
 
+DROP VIEW IF EXISTS `v_situacion_academica`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_situacion_academica`  AS SELECT `e`.`id_estudiante` AS `id_estudiante`, `e`.`apellido` AS `apellido`, `e`.`nombre` AS `nombre`, `e`.`dni` AS `dni`, `e`.`id_carrera` AS `id_carrera`, `m`.`id_materia` AS `id_materia`, `m`.`anio` AS `anio`, `m`.`orden` AS `orden`, `m`.`nombre` AS `materia`, CASE WHEN exists(select 1 from `v_materia_aprobada` `a` where `a`.`id_estudiante` = `e`.`id_estudiante` AND `a`.`id_materia` = `m`.`id_materia` limit 1) THEN 'aprobada' WHEN exists(select 1 from `cursadas` `c` where `c`.`id_estudiante` = `e`.`id_estudiante` AND `c`.`id_materia` = `m`.`id_materia` AND `c`.`caracter` in ('regular','promocional') AND `c`.`anio_cursada` + 2 >= year(curdate()) limit 1) THEN 'regular' WHEN exists(select 1 from `cursadas` `c` where `c`.`id_estudiante` = `e`.`id_estudiante` AND `c`.`id_materia` = `m`.`id_materia` AND `c`.`caracter` is null AND `c`.`estado` = 'cursando' limit 1) THEN 'cursando' WHEN exists(select 1 from `cursadas` `c` where `c`.`id_estudiante` = `e`.`id_estudiante` AND `c`.`id_materia` = `m`.`id_materia` AND `c`.`caracter` is not null limit 1) THEN 'libre' ELSE 'pendiente' END AS `estado_materia`, (select count(0) from `examenes_finales` `x` where `x`.`id_estudiante` = `e`.`id_estudiante` and `x`.`id_materia` = `m`.`id_materia` and `x`.`condicion_alumno` = 'regular' and `x`.`estado` = 'presente' and `x`.`nota` < 4) AS `aplazos_regular`, (select count(0) from `examenes_finales` `x` where `x`.`id_estudiante` = `e`.`id_estudiante` and `x`.`id_materia` = `m`.`id_materia` and `x`.`condicion_alumno` = 'libre' and `x`.`estado` = 'presente' and `x`.`nota` < 4) AS `aplazos_libre` FROM (`estudiantes` `e` join `materias` `m` on(`m`.`id_plan` = `e`.`id_plan` and `m`.`activa` = 1)) ;
 
 -- --------------------------------------------------------
@@ -1584,6 +1635,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `v_tramites_pendientes`;
 
+DROP VIEW IF EXISTS `v_tramites_pendientes`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_tramites_pendientes`  AS SELECT `t`.`id_tramite` AS `id_tramite`, `t`.`id_estudiante` AS `id_estudiante`, `e`.`apellido` AS `apellido`, `e`.`nombre` AS `nombre`, `e`.`dni` AS `dni`, `t`.`tipo` AS `tipo`, `t`.`fecha_solicitud` AS `fecha_solicitud`, `t`.`fecha_limite` AS `fecha_limite`, `t`.`estado` AS `estado`, to_days(`t`.`fecha_limite`) - to_days(curdate()) AS `dias_restantes`, CASE WHEN `t`.`fecha_limite` is null THEN 'sin_plazo' WHEN `t`.`fecha_limite` < curdate() THEN 'vencido' WHEN `t`.`fecha_limite` <= curdate() + interval 7 day THEN 'por_vencer' ELSE 'en_plazo' END AS `situacion`, `e`.`id_carrera` AS `id_carrera` FROM (`tramites` `t` join `estudiantes` `e` on(`e`.`id_estudiante` = `t`.`id_estudiante`)) WHERE `t`.`estado` in ('en_curso','en_revision','observado') ;
 
 --
