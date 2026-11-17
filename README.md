@@ -63,9 +63,6 @@ La vista `v_alertas` quedó pendiente de corregir (error de cotejamiento); el si
 3. En `http://localhost/phpmyadmin` cree la base `ies4_expedientes_v2` con cotejamiento `utf8mb4_general_ci`.
 4. Seleccione la base e importe, **en este orden**, los archivos de `database/` (pestaña Importar):
    1. `ies4_expedientes_v2_estructura.sql` (tablas, vistas y disparadores)
-   2. `datos_catalogo.sql` (carreras, planes, materias, correlatividades, tipos de documento y permisos)
-   3. `parche_roles_y_menu.sql` (deja los permisos de cada rol)
-   4. `usuarios_de_prueba.sql` (usuarios de prueba)
 5. Revise `config/config.php`: `DB_NAME` debe ser `ies4_expedientes_v2`, `DB_USER` `root` y `DB_PASS` vacía (valores por defecto de XAMPP).
 6. Abra `http://localhost/sistema_expediente/`.
 
