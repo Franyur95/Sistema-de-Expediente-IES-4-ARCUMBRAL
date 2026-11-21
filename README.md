@@ -20,7 +20,7 @@ Proyecto de Prácticas Profesionalizantes I · Tecnicatura Superior en Desarroll
 
 ## Tecnologías
 
-PHP 8 (PDO) · MySQL · HTML5 y CSS3 · Apache (XAMPP) · Git y GitHub. Sin frameworks ni servicios externos.
+PHP 8 (PDO) · MariaDB/MySQL · HTML5 y CSS3 · Apache (XAMPP) · Git y GitHub. Sin frameworks ni servicios externos: funciona en red local, sin internet.
 
 ## Roles
 
@@ -77,6 +77,7 @@ Archivos de `database/`:
 5. Revise `config/config.php`: `DB_NAME` = `ies4_expedientes_v2`, `DB_USER` = `root`, `DB_PASS` vacía (valores por defecto de XAMPP).
 6. Abra `http://localhost/sistema_expediente/`.
 
+Si ya tenía la base instalada de antes, en lugar de reimportar ejecute (pestaña SQL) `database/03_legajo_y_alertas.sql`. Haga un respaldo antes.
 
 ### Usuarios de prueba
 
