@@ -75,7 +75,11 @@ if (!$puedeEditarAcademico) {
     exit;
 }
 
-$materias = materias_de_carrera((int)$alumno['id_carrera']);
+$topeAnio = anio_numerico((int)$alumno['anio_ingreso'], $alumno['estado']);
+$materias = array_values(array_filter(
+    materias_de_carrera((int)$alumno['id_carrera']),
+    static fn($m) => (int)$m['anio'] <= $topeAnio
+));
 $idsMaterias = array_map(static fn($m) => (int)$m['id_materia'], $materias);
 
 $url = 'academico.php?id=' . $id;
@@ -199,7 +203,7 @@ $defaults = [
         'id_submateria' => '',
         'fecha' => date('Y-m-d'),
         'anio_cursada' => date('Y'),
-        'condicion' => 'Cursar',
+        'condicion' => 'Cursando',
         'observaciones' => ''
     ],
     'cursada' => [
@@ -354,6 +358,7 @@ function select_cursada(
         }
 
         $descripcion .= ' - Año ' . $c['anio_cursada'];
+        $descripcion .= ' · ' . texto_intentos_cursada($c);
         $descripcion .= ' (Registro #' . $c['id_cursada'] . ')';
 
         echo '<option value="' . (int)$c['id_cursada'] . '"'
@@ -763,7 +768,9 @@ render_header(
     <p class="ayuda">
         Se considera aprobado desde <?= NOTA_APROBACION ?>.
         La ficha muestra hasta tres intentos por espacio y toma como definitivo
-        el último aprobado.
+        el último aprobado. Régimen: la regularidad dura <?= REGULARIDAD_ANIOS ?> años desde
+        la cursada, con <?= INTENTOS_MAX_POR_CONDICION ?> intentos como Regular y luego
+        <?= INTENTOS_MAX_POR_CONDICION ?> como Libre; agotados, el alumno debe recursar.
     </p>
 
     <?php

@@ -150,8 +150,8 @@ foreach ($tipos as $t) {
         <label for="f_condicion">Condición <span class="req">*</span></label>
         <select id="f_condicion" name="condicion" required>
           <option value="">— Seleccione —</option>
-          <option value="cursar"<?= ($inscripcion['condicion'] ?? '') === 'cursar' ? ' selected' : '' ?>>Cursar</option>
-          <option value="recursar"<?= ($inscripcion['condicion'] ?? '') === 'recursar' ? ' selected' : '' ?>>Recursar</option>
+          <option value="cursando"<?= ($inscripcion['condicion'] ?? '') === 'cursando' ? ' selected' : '' ?>>Cursando</option>
+          <option value="recursando"<?= ($inscripcion['condicion'] ?? '') === 'recursando' ? ' selected' : '' ?>>Recursando</option>
         </select>
         <?php if (isset($err['condicion'])): ?>
           <small class="error-campo"><?= e($err['condicion']) ?></small>

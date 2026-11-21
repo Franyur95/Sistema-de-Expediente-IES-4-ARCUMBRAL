@@ -63,14 +63,14 @@ render_header('Buscar alumnos', $usuario);
 <?php if ($filas): ?>
 <div class="tabla-wrap">
   <table class="tabla">
-    <thead><tr><th>Apellido y nombre</th><th>DNI</th><th>Carrera</th><th>Año ingreso</th><th>Estado</th><th>Acciones</th></tr></thead>
-    <tbody>
+    <thead><tr><th>Apellido y nombre</th><th>DNI</th><th>Carrera</th><th>Año ingreso</th><th>Año que cursa</th><th>Estado</th><th>Acciones</th></tr></thead>
 <?php foreach ($filas as $f): ?>
       <tr>
         <td><?= e($f['apellido']) ?>, <?= e($f['nombre']) ?></td>
         <td><?= e($f['dni']) ?></td>
         <td><?= e($f['carrera']) ?> (<?= e($f['turno']) ?>)</td>
         <td><?= (int)$f['anio_ingreso'] ?></td>
+        <td><?= e(anio_que_cursa((int)$f['anio_ingreso'], $f['estado'])) ?></td>
         <td><?= e($f['estado']) ?></td>
         <td class="acciones">
           <a href="ver.php?id=<?= (int)$f['id_estudiante'] ?>">Ver</a>

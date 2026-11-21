@@ -213,7 +213,7 @@ function validar_inscripcion_curso(array $d): array {
         $err['curso'] = 'Seleccione un curso válido entre 1.º y 4.º año.';
     }
 
-    if (!in_array($d['condicion'], ['cursar', 'recursar'], true)) {
+    if (!in_array($d['condicion'], ['cursando', 'recursando'], true)) {
         $err['condicion'] = 'Seleccione la condición de cursado.';
     }
 
@@ -357,4 +357,22 @@ function historial_estudiante(int $idEst, int $limite = 30): array
     );
     $st->execute([$idEst]);
     return $st->fetchAll();
+}
+/** Número de año (1 a 4) que cursa el alumno según su año de ingreso. Egresado = 4 (ve todo). */
+function anio_numerico(int $anioIngreso, string $estado = ''): int
+{
+    if ($estado === 'Egresado') {
+        return 4;
+    }
+    return max(1, min(4, (int)date('Y') - $anioIngreso + 1));
+}
+
+/** Texto del año que cursa, para mostrar en pantalla. */
+function anio_que_cursa(int $anioIngreso, string $estado = ''): string
+{
+    if ($estado === 'Egresado') {
+        return 'Egresado';
+    }
+    $etiquetas = [1 => '1.er año', 2 => '2.º año', 3 => '3.er año', 4 => '4.º año'];
+    return $etiquetas[anio_numerico($anioIngreso, $estado)];
 }

@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/estudiantes.php';
 require_once __DIR__ . '/includes/academico.php';
 require_once __DIR__ . '/includes/semaforo.php';
+require_once __DIR__ . '/includes/tramites.php';
 
 $usuario = require_login();
 exigir_permiso($usuario, 'expedientes.ver');
@@ -51,6 +52,12 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
     </a>
 <?php endif; ?>
 
+<?php if (tiene_permiso($usuario, 'tramites.ver')): ?>
+    <a class="btn" href="tramites_alumno.php?id=<?= (int)$a['id_estudiante'] ?>">
+        Trámites
+    </a>
+<?php endif; ?>
+
     <a class="btn btn-sec" href="imprimir.php?id=<?= (int)$a['id_estudiante'] ?>" target="_blank" rel="noopener">
         Imprimir planilla
     </a>
@@ -60,6 +67,11 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
     </a>
 
 </div>
+ <p class="anio-cursa">
+  <strong>Año que cursa:</strong> <?= e(anio_que_cursa((int)$a['anio_ingreso'], $a['estado'])) ?>
+  · <strong>Ingreso:</strong> <?= (int)$a['anio_ingreso'] ?>
+  · <strong>DNI:</strong> <?= e($a['dni']) ?>
+</p> 
 
 <section class="tarjeta">
     <h2>Datos personales</h2>
@@ -84,6 +96,7 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
         <?php dato('Título con el que ingresó', $a['titulo_ingreso']); ?>
         <?php dato('Establecimiento que lo otorga', $a['establecimiento']); ?>
         <?php dato('Año de ingreso', (string)$a['anio_ingreso']); ?>
+        <?php dato('Año que cursa', anio_que_cursa((int)$a['anio_ingreso'], $a['estado'])); ?>
         <?php dato('Estado', $a['estado']); ?>
         <?php dato('Expediente creado el', fecha_ar($a['creado_en'])); ?>
         <?php dato('Observaciones', $a['observaciones']); ?>
@@ -106,6 +119,33 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
     ); ?>
 </section>
 
+<?php endif; ?>
+
+<?php if (tiene_permiso($usuario, 'tramites.ver')): ?>
+<section class="tarjeta">
+    <h2>Trámites</h2>
+    <?php $trams = listar_tramites_estudiante($id); if ($trams): ?>
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Trámite</th><th>Solicitado</th><th>Estado</th><th>Plazo</th><th>Resolución</th></tr></thead>
+            <tbody>
+            <?php foreach ($trams as $tr): ?>
+                <tr>
+                    <td><?= e(tramite_tipo_etq($tr['tipo'])) ?></td>
+                    <td><?= e(fecha_ar($tr['fecha_solicitud'])) ?></td>
+                    <td><?= e(tramite_estado_etq($tr['estado'])) ?></td>
+                    <td><?= tramite_plazo_html($tr) ?></td>
+                    <td><?= $tr['nro_resolucion'] ? e($tr['nro_resolucion']) . ' (' . e(fecha_ar($tr['fecha_resolucion'])) . ')' : '—' ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php else: ?>
+    <p>Sin trámites registrados.</p>
+    <?php endif; ?>
+    <p><a href="tramites_alumno.php?id=<?= (int)$a['id_estudiante'] ?>">Gestionar trámites de este alumno</a></p>
+</section>
 <?php endif; ?>
 
 <section class="tarjeta">

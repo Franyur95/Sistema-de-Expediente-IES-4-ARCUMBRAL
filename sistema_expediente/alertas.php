@@ -110,7 +110,7 @@ render_header('Alertas', $usuario);
         <td><?= e(ucfirst(str_replace('_', ' ', (string)$f['tipo']))) ?></td>
         <td><?= e(fecha_ar($f['fecha_limite'])) ?></td>
         <td><?= $f['situacion'] === 'vencido' ? '<span class="pendiente">Vencido</span>' : 'Vence en ' . (int)$f['dias_restantes'] . ' día(s)' ?></td>
-        <td class="acciones"><a href="ver.php?id=<?= (int)$f['id_estudiante'] ?>">Ver</a></td>
+        <td class="acciones"><a href="tramites_alumno.php?id=<?= (int)$f['id_estudiante'] ?>">Abrir trámites</a></td>
       </tr>
 <?php endforeach; ?>
 <?php else: ?>

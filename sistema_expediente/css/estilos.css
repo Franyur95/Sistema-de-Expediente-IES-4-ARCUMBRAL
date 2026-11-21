@@ -325,3 +325,9 @@ fieldset {border-radius:12px;}
 .resumen-item { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #c9d1d9; border-radius: 8px; padding: 8px 14px; text-decoration: none; color: #22303c; }
 .resumen-item.activo { border-color: #1f4e79; background: #eaf1f8; }
 .semaforo-fila { margin: 0 0 10px; }
+
+.anio-cursa { background: #e3ebf3; border: 1px solid var(--borde); border-radius: 6px; padding: 10px 14px; margin: 0 0 16px; font-size: 1.05rem; }
+
+@media print {
+  .anio-cursa { background: #fff; border: 2px solid #000; font-size: 1.2rem; }
+}

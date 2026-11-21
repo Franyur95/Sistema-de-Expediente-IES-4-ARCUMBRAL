@@ -10,9 +10,14 @@
  */
 
 const CARACTERES = ['Regular', 'Libre', 'Promocion'];
-const CONDICIONES = ['Cursar', 'Recursar'];
+const CONDICIONES = ['Cursando', 'Recursando'];
 const TIPOS_EXAMEN = ['Regular', 'Libre'];
 const NOTA_APROBACION = 4;
+
+// Régimen académico (relevado en las entrevistas): la regularidad dura 2 años y,
+// por cada cursada, hay 3 intentos como Regular y 3 como Libre. Agotados, se recursa.
+const REGULARIDAD_ANIOS = 2;
+const INTENTOS_MAX_POR_CONDICION = 3;
 
 const NOMBRES_ANIO = [
     1 => 'PRIMER AÑO',
@@ -170,6 +175,13 @@ function listar_cursadas_para_seleccion(int $idEst): array
             c.anio_cursada,
             c.fecha_inscripcion,
             c.tipo_inscripcion,
+            c.caracter,
+            (SELECT COUNT(*) FROM examenes_finales x
+              WHERE x.id_cursada = c.id_cursada AND x.estado = 'presente'
+                AND x.condicion_alumno = 'regular') AS int_regular,
+            (SELECT COUNT(*) FROM examenes_finales x
+              WHERE x.id_cursada = c.id_cursada AND x.estado = 'presente'
+                AND x.condicion_alumno = 'libre') AS int_libre,
             m.nombre AS materia,
             sm.nombre AS submateria
         FROM cursadas c
@@ -599,9 +611,7 @@ function err_materia(string $v, array $idsMaterias): ?string
         return 'Seleccione el espacio curricular.';
     }
 
-    return in_array((int)$v, $idsMaterias, true)
-        ? null
-        : 'El espacio curricular no corresponde a la carrera del alumno.';
+    return in_array((int)$v, $idsMaterias, true) ? null : 'El espacio curricular no está habilitado para el año que cursa el alumno.';
 }
 
 function err_fecha_pasada(string $v, string $etq): ?string
@@ -764,6 +774,119 @@ function examen_ya_aprobado(
     ]);
 
     return (int)$st->fetchColumn() > 0;
+}
+
+/* =========================================================
+   REGLAS DEL RÉGIMEN: REGULARIDAD E INTENTOS DE EXAMEN
+   ========================================================= */
+
+/** Exámenes rendidos (presente) en una cursada, separados por condición. */
+function intentos_examen_cursada(int $idEst, int $idCursada): array
+{
+    $st = db()->prepare("
+        SELECT condicion_alumno, COUNT(*)
+        FROM examenes_finales
+        WHERE id_estudiante = ?
+          AND id_cursada = ?
+          AND estado = 'presente'
+        GROUP BY condicion_alumno
+    ");
+
+    $st->execute([$idEst, $idCursada]);
+
+    $n = ['regular' => 0, 'libre' => 0];
+
+    foreach ($st->fetchAll(PDO::FETCH_NUM) as $fila) {
+        if (isset($n[$fila[0]])) {
+            $n[$fila[0]] = (int)$fila[1];
+        }
+    }
+
+    return $n;
+}
+
+/** Texto informativo para el selector de cursadas. */
+function texto_intentos_cursada(array $c): string
+{
+    $max = INTENTOS_MAX_POR_CONDICION;
+
+    $txt = 'Regular ' . (int)($c['int_regular'] ?? 0) . '/' . $max
+        . ' · Libre ' . (int)($c['int_libre'] ?? 0) . '/' . $max
+        . ' · regularidad hasta ' . ((int)$c['anio_cursada'] + REGULARIDAD_ANIOS);
+
+    if (($c['caracter'] ?? null) === null) {
+        $txt = 'carácter sin cargar · ' . $txt;
+    }
+
+    return $txt;
+}
+
+/*
+ * Controla si el alumno puede rendir un examen final en esa cursada.
+ * Devuelve el mensaje de error, o null si puede rendir.
+ *
+ *  - La cursada debe tener su carácter cargado (Regular o Libre).
+ *  - Como Regular: la regularidad dura REGULARIDAD_ANIOS años desde el año de
+ *    cursada y hay INTENTOS_MAX_POR_CONDICION intentos.
+ *  - Como Libre: solo si la cursada quedó Libre, si venció la regularidad o si se
+ *    agotaron los intentos como Regular; también con un máximo de intentos.
+ *  - Agotados los intentos Libres, debe recursar (nueva cursada, nuevos intentos).
+ */
+function err_reglas_examen(int $idEst, int $idCursada, string $tipo, string $fecha): ?string
+{
+    $st = db()->prepare('SELECT anio_cursada, caracter FROM cursadas WHERE id_cursada = ? AND id_estudiante = ?');
+    $st->execute([$idCursada, $idEst]);
+    $c = $st->fetch(PDO::FETCH_ASSOC);
+
+    if (!$c) {
+        return null; // Los demás controles ya informan que la cursada no corresponde.
+    }
+
+    $max = INTENTOS_MAX_POR_CONDICION;
+    $anioCursada = (int)$c['anio_cursada'];
+    $hasta = $anioCursada + REGULARIDAD_ANIOS;
+    $f = fecha_valida($fecha);
+    $anioExamen = $f ? (int)$f->format('Y') : (int)date('Y');
+    $vigente = $anioExamen <= $hasta;
+    $n = intentos_examen_cursada($idEst, $idCursada);
+
+    if ($c['caracter'] === null) {
+        return 'La cursada ' . $anioCursada . ' todavía no tiene el carácter cargado (sigue en curso). '
+             . 'Cárguelo en «Cursada por espacio curricular» antes de registrar un examen.';
+    }
+
+    if ($c['caracter'] === 'promocional') {
+        return 'Esta cursada se aprobó por promoción: no corresponde registrar examen final.';
+    }
+
+    if ($tipo === 'Regular') {
+        if ($c['caracter'] === 'libre') {
+            return 'En esta cursada el alumno quedó en condición Libre: el examen debe registrarse como Libre.';
+        }
+        if (!$vigente) {
+            return 'La regularidad de la cursada ' . $anioCursada . ' venció en ' . $hasta
+                 . '. Corresponde rendir como Libre o recursar el espacio.';
+        }
+        if ($n['regular'] >= $max) {
+            return 'Ya usó los ' . $max . ' intentos como Regular de esta cursada. Corresponde rendir como Libre.';
+        }
+        return null;
+    }
+
+    // Examen Libre.
+    if ($n['libre'] >= $max) {
+        return 'Ya usó los ' . $max . ' intentos como Libre de esta cursada: debe recursar el espacio curricular.';
+    }
+
+    $puedeLibre = $c['caracter'] === 'libre' || !$vigente || $n['regular'] >= $max;
+
+    if (!$puedeLibre) {
+        return 'Todavía tiene regularidad vigente (hasta ' . $hasta . ') y le quedan '
+             . ($max - $n['regular']) . ' intento(s) como Regular. '
+             . 'Solo puede rendir como Libre al agotarlos o al vencer la regularidad.';
+    }
+
+    return null;
 }
 
 function validar_inscripcion(
@@ -1058,6 +1181,18 @@ if (examen_ya_aprobado(
         $e['observacion'] = 'La observación no puede superar 200 caracteres.';
     }
 
+    // Reglas del régimen: regularidad (2 años) e intentos (3 Regular + 3 Libre por cursada).
+    if (
+        $d['id_cursada'] !== ''
+        && !isset($e['id_cursada'])
+        && !isset($e['tipo'])
+        && !isset($e['fecha'])
+    ) {
+        if ($m = err_reglas_examen($idEst, (int)$d['id_cursada'], $d['tipo'], $d['fecha'])) {
+            $e['tipo'] = $m;
+        }
+    }
+
     // Evitar duplicar un examen de la misma cursada en la misma fecha.
     if (!$e) {
         $st = db()->prepare("
@@ -1219,7 +1354,7 @@ if ($pendientes) {
             );
         }
 
-        $tipo = $d['condicion'] === 'Recursar'
+        $tipo = $d['condicion'] === 'Recursando'
             ? 'recursar'
             : 'cursar';
 
@@ -1380,6 +1515,11 @@ function guardar_examen(
             throw new RuntimeException(
                 'No se puede registrar el examen porque el estudiante ya aprobó esta materia.'
             );
+        }
+
+        // Regularidad e intentos (control también en el servidor al guardar).
+        if ($m = err_reglas_examen($idEst, $idCursada, $d['tipo'], $d['fecha'])) {
+            throw new RuntimeException($m);
         }
 
         $cond = $d['tipo'] === 'Libre'

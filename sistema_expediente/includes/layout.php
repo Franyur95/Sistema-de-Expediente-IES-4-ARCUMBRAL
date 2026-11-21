@@ -29,6 +29,9 @@ function render_header(string $titulo, ?array $usuario = null): void
     <a href="buscar.php" <?= $paginaActual === 'buscar.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">⌕</span>Buscar alumnos</a>
     <a href="reportes.php" <?= $paginaActual === 'reportes.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">▤</span>Reportes</a>
 <?php endif; ?>
+<?php if (tiene_permiso($usuario, 'tramites.ver')): ?>
+    <a href="tramites.php" <?= in_array($paginaActual, ['tramites.php', 'tramites_alumno.php'], true) ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">⇄</span>Trámites</a>
+<?php endif; ?>
 <?php if (tiene_permiso($usuario, 'semaforo.ver')): ?>
     <a href="semaforo.php" <?= $paginaActual === 'semaforo.php' ? 'class="activo" aria-current="page"' : '' ?>><span class="nav-icon" aria-hidden="true">◍</span>Semáforo</a>
 <?php endif; ?>
