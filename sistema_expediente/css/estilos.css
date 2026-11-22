@@ -1,10 +1,11 @@
 /* Estilos propios (CSS3 básico, sin frameworks) */
+
 :root {
   --azul: #0759A8;
   --azul-osc: #0759A8;
-  --fondo: #f1f4f7;
+  --fondo: #FFFFFF;
   --borde: #c9d1d9;
-  --texto: #22303c;
+  --texto: #050505;
   --ok: #1e6b35;
   --ok-fondo: #e4f4e8;
   --error: #a4231b;
@@ -12,6 +13,7 @@
   --aviso: #7a5800;
   --aviso-fondo: #fff4d6;
 }
+
 
 * { box-sizing: border-box; }
 
@@ -330,4 +332,37 @@ fieldset {border-radius:12px;}
 
 @media print {
   .anio-cursa { background: #fff; border: 2px solid #000; font-size: 1.2rem; }
+}
+
+/* UNIFICAR AZUL INSTITUCIONAL */
+
+:root {
+    --azul: #0759A8;
+    --azul-osc: #0759A8;
+}
+
+/* Cabecera superior */
+.layout-sistema .barra {
+    background: #0759A8;
+}
+
+/* Menú lateral */
+.menu-lateral {
+    background: #0759A8;
+}
+
+/* Encabezados de tablas */
+.tabla thead th {
+    background: #0759A8;
+}
+
+/* Botones principales */
+.btn {
+    background: #0759A8;
+    border-color: #0759A8;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    color: #0759A8;
 }
