@@ -14,7 +14,7 @@ define('DB_PASS', ''); // En XAMPP suele estar vacío por defecto.
 define('DB_CHARSET', 'utf8mb4');
 
 // --- Aplicación ---
-define('APP_NOMBRE', 'Instituto de Educación Superior Nº 4 "Raúl Escalabrini Ortiz"');
+define('APP_NOMBRE', 'Instituto de Educación Superior Nº 4 "Raúl Scalabrini Ortiz"');
 define('APP_SIGLA', 'IES Nº 4');
 define('SESION_MINUTOS', 30);   // Cierre automático por inactividad
 define('POR_PAGINA', 15);       // Filas por página en la búsqueda

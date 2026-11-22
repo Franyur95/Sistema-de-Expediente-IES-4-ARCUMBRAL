@@ -8,7 +8,7 @@
  * Las inscripciones administrativas a 1.º, 2.º, 3.º y 4.º año
  * se gestionan por separado en inscripciones_curso.
  */
-
+require_once __DIR__ . '/doble_cursado.php';
 const CARACTERES = ['Regular', 'Libre', 'Promocion'];
 const CONDICIONES = ['Cursando', 'Recursando'];
 const TIPOS_EXAMEN = ['Regular', 'Libre'];
@@ -986,6 +986,13 @@ function validar_inscripcion(
     } else {
         $d['id_submateria'] = null;
     }
+     // Evitar el doble cursado: la materia no debe estar ya aprobada.
+    if (!$e && $d['id_materia'] !== '') {
+        if (espacio_ya_aprobado($idEst, (int)$d['id_materia'], $d['id_submateria'])) {
+            $e['id_materia'] = 'No puede inscribirse: el alumno ya tiene aprobada esta materia '
+                . '(por promoción, examen final o equivalencia). Revise su situación académica.';
+        }
+    }   
     // Verificar que el estudiante cumpla las correlativas para cursar.
 if (!$e && $d['id_materia'] !== '') {
     $pendientes = correlativas_pendientes(
@@ -1310,7 +1317,12 @@ function nombre_espacio_academico(
 
     return $nombre;
 }
-
+        // Volver a comprobar que la materia no esté ya aprobada (doble cursado).
+    if (espacio_ya_aprobado($idEst, $idMateria, $d['id_submateria'] !== null ? (int)$d['id_submateria'] : null)) {
+            throw new RuntimeException(
+                'No se puede realizar la inscripción: el alumno ya tiene aprobada esta materia.'
+            );
+    }
 /*
  * Registrar la inscripción inicial a una materia o submateria.
  */
@@ -1437,6 +1449,8 @@ if ($pendientes) {
         return $idCursada;
     });
 }
+
+
 
 /*
  * Guardar o actualizar los datos académicos de una cursada.
