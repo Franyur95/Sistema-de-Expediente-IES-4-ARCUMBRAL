@@ -68,10 +68,9 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
 
 </div>
  <p class="anio-cursa">
-  <strong>Año que cursa:</strong> <?= e(anio_que_cursa((int)$a['anio_ingreso'], $a['estado'])) ?>
-  · <strong>Ingreso:</strong> <?= (int)$a['anio_ingreso'] ?>
+  <strong>Año que cursa:</strong> <?= e(anio_que_cursa_alumno((int)$a['id_estudiante'], $a['estado'])) ?>
   · <strong>DNI:</strong> <?= e($a['dni']) ?>
-</p> 
+</p>
 
 <section class="tarjeta">
     <h2>Datos personales</h2>
@@ -96,7 +95,7 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
         <?php dato('Título con el que ingresó', $a['titulo_ingreso']); ?>
         <?php dato('Establecimiento que lo otorga', $a['establecimiento']); ?>
         <?php dato('Año de ingreso', (string)$a['anio_ingreso']); ?>
-        <?php dato('Año que cursa', anio_que_cursa((int)$a['anio_ingreso'], $a['estado'])); ?>
+        <?php dato('Año que cursa', anio_que_cursa_alumno((int)$a['id_estudiante'], $a['estado'])); ?>
         <?php dato('Estado', $a['estado']); ?>
         <?php dato('Expediente creado el', fecha_ar($a['creado_en'])); ?>
         <?php dato('Observaciones', $a['observaciones']); ?>

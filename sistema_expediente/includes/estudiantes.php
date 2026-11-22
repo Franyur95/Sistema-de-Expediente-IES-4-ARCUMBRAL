@@ -376,3 +376,53 @@ function anio_que_cursa(int $anioIngreso, string $estado = ''): string
     $etiquetas = [1 => '1.er año', 2 => '2.º año', 3 => '3.er año', 4 => '4.º año'];
     return $etiquetas[anio_numerico($anioIngreso, $estado)];
 }
+/**
+ * Número de año (1 a 4) que cursa el alumno según su última inscripción al curso.
+ * Sin inscripciones: 1 (solo se usa para limitar materias).
+ */
+function anio_numerico_alumno(int $idEst, string $estado = ''): int
+{
+    if ($estado === 'egresado') {
+        return 4;
+    }
+
+    $st = db()->prepare("
+        SELECT curso
+        FROM inscripciones_curso
+        WHERE id_estudiante = ?
+        ORDER BY fecha_inscripcion DESC, curso DESC, id_inscripcion DESC
+        LIMIT 1
+    ");
+    $st->execute([$idEst]);
+
+    $curso = $st->fetchColumn();
+
+    return $curso !== false ? (int)$curso : 1;
+}
+
+/** Texto del año que cursa, según su última inscripción al curso. */
+function anio_que_cursa_alumno(int $idEst, string $estado = ''): string
+{
+    if ($estado === 'egresado') {
+        return 'Egresado';
+    }
+
+    $st = db()->prepare("
+        SELECT curso
+        FROM inscripciones_curso
+        WHERE id_estudiante = ?
+        ORDER BY fecha_inscripcion DESC, curso DESC, id_inscripcion DESC
+        LIMIT 1
+    ");
+    $st->execute([$idEst]);
+
+    $curso = $st->fetchColumn();
+
+    if ($curso === false) {
+        return 'Sin asignar';
+    }
+
+    $etiquetas = [1 => '1.er año', 2 => '2.º año', 3 => '3.er año', 4 => '4.º año'];
+
+    return $etiquetas[(int)$curso];
+}

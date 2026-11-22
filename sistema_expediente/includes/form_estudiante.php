@@ -176,7 +176,8 @@ foreach ($tipos as $t) {
 <?php if ($tipos): ?>
   <fieldset>
     <legend>Documentación presentada</legend>
-    <?php if ($pendientesDocs): ?>
+        <?php if ($action === 'nuevo.php'): ?>
+    <?php elseif ($pendientesDocs): ?>
     <div class="alerta error" role="alert">
         <strong>Documentación obligatoria pendiente:</strong>
         <ul>

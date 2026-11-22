@@ -30,7 +30,8 @@ const TABLAS_REGISTRO = [
     'inscripcion' => ['cursadas', 'id_cursada', 'Inscripción'],
     'cursada' => ['cursadas', 'id_cursada', 'Cursada'],
     'examen' => ['examenes_finales', 'id_examen', 'Examen'],
-];
+        'inscripcion_curso' => ['inscripciones_curso', 'id_inscripcion', 'Inscripción al curso'],
+    ];
 
 /* =========================================================
    LECTURA
@@ -132,7 +133,7 @@ function listar_inscripciones_curso(int $idEst): array
     return $st->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function render_inscripciones_curso(array $filas): void
+function render_inscripciones_curso(array $filas, bool $conAcciones = false, int $idEst = 0): void
 {
     if (!$filas) {
         echo '<p>No hay registros de inscripción al curso.</p>';
@@ -144,6 +145,7 @@ function render_inscripciones_curso(array $filas): void
         . '<th>Curso</th>'
         . '<th>Condición</th>'
         . '<th>Observaciones</th>'
+        . ($conAcciones ? '<th></th>' : '')
         . '</tr></thead><tbody>';
 
     foreach ($filas as $f) {
@@ -152,12 +154,15 @@ function render_inscripciones_curso(array $filas): void
             . '<td>' . (int)$f['curso'] . '.º año</td>'
             . '<td>' . e(ucfirst($f['condicion'])) . '</td>'
             . '<td>' . e($f['observaciones'] ?? '') . '</td>'
+            . ($conAcciones
+                ? '<td><a href="academico.php?id=' . $idEst . '&amp;del=inscripcion_curso:'
+                    . (int)$f['id_inscripcion'] . '#confirmar">Eliminar</a></td>'
+                : '')
             . '</tr>';
     }
 
     echo '</tbody></table></div>';
 }
-
 /*
  * Devuelve todas las cursadas que tienen inscripción.
  * Incluye también las que todavía no tienen asistencia,
@@ -888,7 +893,37 @@ function err_reglas_examen(int $idEst, int $idCursada, string $tipo, string $fec
 
     return null;
 }
+/*
+ * La inscripción a una materia exige que el alumno esté inscripto al curso
+ * ese año lectivo, y que la materia no sea de un año superior a ese curso.
+ */
+function err_materia_vs_curso(int $idEst, int $idMateria, int $anioCursada): ?string
+{
+    $st = db()->prepare('SELECT anio FROM materias WHERE id_materia = ?');
+    $st->execute([$idMateria]);
+    $anioMateria = (int)$st->fetchColumn();
 
+    $st = db()->prepare("
+        SELECT MAX(curso)
+        FROM inscripciones_curso
+        WHERE id_estudiante = ?
+          AND YEAR(fecha_inscripcion) = ?
+    ");
+    $st->execute([$idEst, $anioCursada]);
+    $curso = $st->fetchColumn();
+
+    if ($curso === false || $curso === null) {
+        return 'Antes de inscribir a materias debe registrar la inscripción al curso de '
+             . $anioCursada . ' en «Registro de inscripción al curso».';
+    }
+
+    if ($anioMateria > (int)$curso) {
+        return 'En ' . $anioCursada . ' el alumno está inscripto a ' . (int)$curso
+             . '.º año: no puede inscribirse a una materia de ' . $anioMateria . '.º año.';
+    }
+
+    return null;
+}
 function validar_inscripcion(
     array $p,
     array $idsMaterias,
@@ -970,7 +1005,13 @@ if (!$e && $d['id_materia'] !== '') {
             . 'no cumple las siguientes correlativas: '
             . implode(', ', $nombres) . '.';
     }
-}
+}   
+    // La materia tiene que corresponder al curso en que está inscripto ese año.
+    if (!$e) {
+        if ($m = err_materia_vs_curso($idEst, (int)$d['id_materia'], (int)$d['anio_cursada'])) {
+            $e['id_materia'] = $m;
+        }
+    }
     // Evitar duplicar el mismo espacio curricular en el mismo año.
     if (!$e) {
         $st = db()->prepare("
@@ -1315,7 +1356,10 @@ if ($pendientes) {
         . 'Faltan aprobar o regularizar estas correlativas: '
         . implode(', ', $nombres) . '.'
     );
-}
+}        // Volver a comprobar que la materia corresponde al curso de ese año.
+        if ($m = err_materia_vs_curso($idEst, $idMateria, (int)$d['anio_cursada'])) {
+            throw new RuntimeException($m);
+        }
         $idSubmateria = $d['id_submateria'] !== null
             ? (int)$d['id_submateria']
             : null;
@@ -1596,7 +1640,21 @@ function descripcion_registro(
     if (!isset(TABLAS_REGISTRO[$tipo])) {
         return null;
     }
+        if ($tipo === 'inscripcion_curso') {
+        $st = db()->prepare("
+            SELECT curso, fecha_inscripcion, condicion
+            FROM inscripciones_curso
+            WHERE id_inscripcion = ?
+              AND id_estudiante = ?
+        ");
+        $st->execute([$idReg, $idEst]);
+        $r = $st->fetch(PDO::FETCH_ASSOC);
 
+        return $r
+            ? 'Inscripción al curso: ' . (int)$r['curso'] . '.º año ('
+              . $r['condicion'] . ', ' . fecha_ar($r['fecha_inscripcion']) . ')'
+            : null;
+    }
     if ($tipo === 'examen') {
         $st = db()->prepare("
             SELECT
@@ -1770,7 +1828,75 @@ function eliminar_registro(
             ");
 
             $st->execute([$idReg, $idEst]);
+                } elseif ($tipo === 'inscripcion_curso') {
+            $st = $pdo->prepare("
+                SELECT curso, YEAR(fecha_inscripcion) AS anio
+                FROM inscripciones_curso
+                WHERE id_inscripcion = ?
+                  AND id_estudiante = ?
+            ");
+            $st->execute([$idReg, $idEst]);
+            $r = $st->fetch(PDO::FETCH_ASSOC);
 
+            if (!$r) {
+                throw new RuntimeException('No se encontró la inscripción al curso.');
+            }
+
+            $curso = (int)$r['curso'];
+            $anio = (int)$r['anio'];
+
+            // 1. No borrar si hay inscripciones posteriores que dependen de esta.
+            $st = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM inscripciones_curso
+                WHERE id_estudiante = ?
+                  AND id_inscripcion <> ?
+                  AND YEAR(fecha_inscripcion) > ?
+                  AND (curso = ? OR (curso = ? AND condicion = 'recursando'))
+            ");
+            $st->execute([$idEst, $idReg, $anio, $curso + 1, $curso]);
+
+            if ((int)$st->fetchColumn() > 0) {
+                throw new RuntimeException(
+                    'No se puede eliminar esta inscripción porque hay inscripciones posteriores '
+                    . 'que dependen de ella. Elimine primero las más recientes.'
+                );
+            }
+
+            // 2. No borrar si dejaría sin respaldo a materias inscriptas ese año.
+            $st = $pdo->prepare("
+                SELECT MAX(curso)
+                FROM inscripciones_curso
+                WHERE id_estudiante = ?
+                  AND id_inscripcion <> ?
+                  AND YEAR(fecha_inscripcion) = ?
+            ");
+            $st->execute([$idEst, $idReg, $anio]);
+            $restante = (int)$st->fetchColumn(); // 0 si no queda ninguna ese año
+
+            $st = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM cursadas c
+                INNER JOIN materias m ON m.id_materia = c.id_materia
+                WHERE c.id_estudiante = ?
+                  AND c.anio_cursada = ?
+                  AND m.anio > ?
+            ");
+            $st->execute([$idEst, $anio, $restante]);
+
+            if ((int)$st->fetchColumn() > 0) {
+                throw new RuntimeException(
+                    'No se puede eliminar esta inscripción porque el alumno tiene materias '
+                    . 'inscriptas en ' . $anio . ' que dependen de ella. Elimine primero esas materias.'
+                );
+            }
+
+            $st = $pdo->prepare("
+                DELETE FROM inscripciones_curso
+                WHERE id_inscripcion = ?
+                  AND id_estudiante = ?
+            ");
+            $st->execute([$idReg, $idEst]);
         } elseif ($tipo === 'cursada') {
             // No eliminar una cursada que tenga exámenes asociados.
             $st = $pdo->prepare("
@@ -1838,4 +1964,112 @@ function eliminar_registro(
     });
 
     return true;
+}
+
+/*
+ * Reglas de la inscripción al curso:
+ *  - No puede ser de un año lectivo anterior al de ingreso.
+ *  - Año máximo = año de la inscripción - año de ingreso + 1 (tope 4).
+ *    Ej.: ingresó en 2026 -> en 2026 solo 1.º. Ingresó en 2025 -> en 2026 hasta 2.º.
+ *  - 2.º, 3.º y 4.º requieren estar inscripto al año anterior en un año lectivo previo.
+ *  - No se repite el mismo curso en el mismo año lectivo.
+ */
+function err_secuencia_curso(int $idEst, int $curso, string $fecha, int $anioIngreso, string $condicion = ''): ?string
+{
+    $anio = (int)substr($fecha, 0, 4);
+
+    if ($anio < $anioIngreso) {
+        return 'La inscripción no puede ser de un año anterior al ingreso del alumno (' . $anioIngreso . ').';
+    }
+
+    $maximo = min(4, $anio - $anioIngreso + 1);
+
+    if ($curso > $maximo) {
+        return 'El alumno ingresó en ' . $anioIngreso . ': en ' . $anio
+             . ' solo puede inscribirse hasta ' . $maximo . '.º año.';
+    }
+
+    // Mismo curso en el mismo año lectivo.
+    $st = db()->prepare("
+        SELECT COUNT(*)
+        FROM inscripciones_curso
+        WHERE id_estudiante = ?
+          AND curso = ?
+          AND YEAR(fecha_inscripcion) = ?
+    ");
+    $st->execute([$idEst, $curso, $anio]);
+
+    if ((int)$st->fetchColumn() > 0) {
+        return 'El alumno ya está inscripto a ' . $curso . '.º año en ' . $anio . '.';
+    }
+        // Cursando: solo la primera vez que se inscribe a ese curso.
+    if ($condicion === 'cursando') {
+        $st = db()->prepare("
+            SELECT COUNT(*)
+            FROM inscripciones_curso
+            WHERE id_estudiante = ?
+              AND curso = ?
+              AND YEAR(fecha_inscripcion) < ?
+        ");
+        $st->execute([$idEst, $curso, $anio]);
+
+        if ((int)$st->fetchColumn() > 0) {
+            return 'El alumno ya se inscribió antes a ' . $curso . '.º año: corresponde «Recursando».';
+        }
+
+        // 1.º año por primera vez: solo en el año de ingreso.
+        if ($curso === 1 && $anio !== $anioIngreso) {
+            return 'El alumno ingresó en ' . $anioIngreso . ': 1.º año como «Cursando» solo corresponde en ese año. '
+                 . 'Si lo está recursando, primero registre su inscripción a 1.º de ' . $anioIngreso
+                 . ' y luego elija «Recursando».';
+        }
+    }
+        // Recursar: solo si ya se había inscripto antes a ese mismo curso.
+    if ($condicion === 'recursando') {
+        $st = db()->prepare("
+            SELECT COUNT(*)
+            FROM inscripciones_curso
+            WHERE id_estudiante = ?
+              AND curso = ?
+              AND YEAR(fecha_inscripcion) < ?
+        ");
+        $st->execute([$idEst, $curso, $anio]);
+
+        if ((int)$st->fetchColumn() === 0) {
+            return 'No puede recursar ' . $curso . '.º año: el alumno no tiene una inscripción '
+                 . 'anterior a ese curso.';
+        }
+    }
+    // 2.º, 3.º y 4.º: tiene que haberse inscripto al año anterior antes.
+    
+    if ($curso > 1) {
+        $st = db()->prepare("
+            SELECT COUNT(*)
+            FROM inscripciones_curso
+            WHERE id_estudiante = ?
+              AND curso = ?
+              AND YEAR(fecha_inscripcion) < ?
+        ");
+        $st->execute([$idEst, $curso - 1, $anio]);
+
+        if ((int)$st->fetchColumn() === 0) {
+            return 'No puede inscribirse a ' . $curso . '.º año: antes debe estar inscripto a '
+                 . ($curso - 1) . '.º año en un año lectivo anterior a ' . $anio . '.';
+        }
+    }
+
+    return null;
+}
+
+function validar_inscripcion_curso_secuencia(array $d, int $idEst, int $anioIngreso): array
+{
+    $err = validar_inscripcion_curso($d); // validaciones que ya tenías
+
+    if (!$err) {
+                if ($m = err_secuencia_curso($idEst, (int)$d['curso'], $d['fecha_inscripcion'], $anioIngreso, $d['condicion'])) {
+            $err['curso'] = $m;
+        }
+    }
+
+    return $err;
 }

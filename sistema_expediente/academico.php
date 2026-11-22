@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
 
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/estudiantes.php';
@@ -75,7 +72,7 @@ if (!$puedeEditarAcademico) {
     exit;
 }
 
-$topeAnio = anio_numerico((int)$alumno['anio_ingreso'], $alumno['estado']);
+$topeAnio = anio_numerico_alumno($id, $alumno['estado']);
 $materias = array_values(array_filter(
     materias_de_carrera((int)$alumno['id_carrera']),
     static fn($m) => (int)$m['anio'] <= $topeAnio
@@ -110,12 +107,14 @@ if ($idsMaterias) {
 $cursadasDisponibles = listar_cursadas_para_seleccion($id);
 
 $errores = [
+    'inscripcion_curso' => [],
     'inscripcion' => [],
     'cursada' => [],
     'examen' => []
 ];
 
 $vals = [
+    'inscripcion_curso' => [],
     'inscripcion' => [],
     'cursada' => [],
     'examen' => []
@@ -130,7 +129,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $accion = campo($_POST, 'accion');
+    
+    // Solo los alumnos activos pueden inscribirse o rendir exámenes.
+    if (
+        in_array($accion, ['inscripcion_curso', 'inscripcion', 'examen'], true)
+        && $alumno['estado'] !== 'activo'
+    ) {
+        $etiquetasEstado = [
+            'libre' => 'Libre',
+            'egresado' => 'Egresado',
+            'abandono' => 'Abandono',
+            'pase' => 'Con pase',
+            'fallecido' => 'Fallecido'
+        ];
 
+        flash(
+            'error',
+            'No se puede registrar: el alumno figura como «'
+            . ($etiquetasEstado[$alumno['estado']] ?? $alumno['estado'])
+            . '». Solo los alumnos activos pueden inscribirse o rendir exámenes.'
+        );
+        redirigir($url);
+    }
     try {
         if ($accion === 'inscripcion') {
             [$err, $d] = validar_inscripcion($_POST, $idsMaterias, $id);
@@ -143,7 +163,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errores['inscripcion'] = $err;
             $vals['inscripcion'] = $d;
+        } elseif ($accion === 'inscripcion_curso') {
+            $d = inscripcion_curso_desde_post($_POST);
+                        $err = validar_inscripcion_curso_secuencia($d, $id, (int)$alumno['anio_ingreso']);
 
+            if (!$err) {
+                guardar_inscripcion_curso($id, $d);
+                auditar(
+                    'Alta de inscripción al curso',
+                    $d['curso'] . '.º año (' . $d['condicion'] . ')',
+                    $id,
+                    $usuario['id_usuario']
+                );
+                flash('ok', 'Inscripción al curso registrada.');
+                redirigir($url);
+            }
+
+            $errores['inscripcion_curso'] = $err;
+            $vals['inscripcion_curso'] = $d;
         } elseif ($accion === 'cursada') {
             [$err, $d] = validar_cursada($_POST, $id);
 
@@ -198,6 +235,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $defaults = [
+    'inscripcion_curso' => [
+        'fecha_inscripcion' => date('Y-m-d'),
+        'curso' => '',
+        'condicion' => '',
+        'observaciones' => ''
+    ],
     'inscripcion' => [
         'id_materia' => '',
         'id_submateria' => '',
@@ -234,7 +277,7 @@ $confirmar = null;
 if (
     isset($_GET['del'])
     && is_string($_GET['del'])
-    && preg_match('/^(inscripcion|cursada|examen):(\d{1,9})$/', $_GET['del'], $mm)
+        && preg_match('/^(inscripcion_curso|inscripcion|cursada|examen):(\d{1,9})$/', $_GET['del'], $mm)
 ) {
     $desc = descripcion_registro($mm[1], (int)$mm[2], $id);
 
@@ -444,7 +487,11 @@ render_header(
     <?= e($alumno['carrera']) ?>
     (<?= e($alumno['turno']) ?>)
 </p>
-
+<?php if ($alumno['estado'] !== 'activo'): ?>
+    <div class="alerta aviso">
+        Este alumno figura como «<?= e($alumno['estado']) ?>»: no se pueden registrar inscripciones ni exámenes.
+    </div>
+<?php endif; ?>
 <?php if ($confirmar): ?>
     <div class="alerta aviso" id="confirmar">
         <p>
@@ -463,7 +510,73 @@ render_header(
         </form>
     </div>
 <?php endif; ?>
+<!-- ============ REGISTRO DE INSCRIPCIÓN AL CURSO ============ -->
 
+<section class="tarjeta">
+    <h2>Registro de inscripción al curso</h2>
+
+       <?php render_inscripciones_curso(listar_inscripciones_curso($id), true, $id); ?>
+    <h3>Registrar inscripción al curso</h3>
+
+    <?php
+    $er = $errores['inscripcion_curso'];
+    $v = $vals['inscripcion_curso'];
+    resumen_errores($er);
+    ?>
+
+    <form method="post" action="<?= e($url) ?>" class="formulario">
+        <?= csrf_campo() ?>
+        <input type="hidden" name="accion" value="inscripcion_curso">
+
+        <div class="fila">
+            <div class="campo<?= isset($er['fecha_inscripcion']) ? ' campo-error' : '' ?>">
+                <label for="f_ic_fecha">Fecha de inscripción <span class="req">*</span></label>
+                <input type="date" id="f_ic_fecha" name="fecha_inscripcion"
+                       value="<?= e($v['fecha_inscripcion']) ?>" max="<?= e(date('Y-m-d')) ?>" required>
+                <?php if (isset($er['fecha_inscripcion'])): ?>
+                    <small class="error-campo"><?= e($er['fecha_inscripcion']) ?></small>
+                <?php endif; ?>
+            </div>
+
+            <div class="campo<?= isset($er['curso']) ? ' campo-error' : '' ?>">
+                <label for="f_ic_curso">Curso <span class="req">*</span></label>
+                <select id="f_ic_curso" name="curso" required>
+                    <option value="">— Seleccione el año —</option>
+                    <?php for ($i = 1; $i <= 4; $i++): ?>
+                        <option value="<?= $i ?>"<?= (string)$v['curso'] === (string)$i ? ' selected' : '' ?>><?= $i ?>.º año</option>
+                    <?php endfor; ?>
+                </select>
+                <?php if (isset($er['curso'])): ?>
+                    <small class="error-campo"><?= e($er['curso']) ?></small>
+                <?php endif; ?>
+            </div>
+
+            <div class="campo<?= isset($er['condicion']) ? ' campo-error' : '' ?>">
+                <label for="f_ic_condicion">Condición <span class="req">*</span></label>
+                <select id="f_ic_condicion" name="condicion" required>
+                    <option value="">— Seleccione —</option>
+                    <option value="cursando"<?= $v['condicion'] === 'cursando' ? ' selected' : '' ?>>Cursando</option>
+                    <option value="recursando"<?= $v['condicion'] === 'recursando' ? ' selected' : '' ?>>Recursando</option>
+                </select>
+                <?php if (isset($er['condicion'])): ?>
+                    <small class="error-campo"><?= e($er['condicion']) ?></small>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="campo<?= isset($er['observaciones_inscripcion']) ? ' campo-error' : '' ?>">
+            <label for="f_ic_obs">Observaciones de la inscripción</label>
+            <textarea id="f_ic_obs" name="observaciones_inscripcion" rows="3" maxlength="1000"><?= e($v['observaciones']) ?></textarea>
+            <?php if (isset($er['observaciones_inscripcion'])): ?>
+                <small class="error-campo"><?= e($er['observaciones_inscripcion']) ?></small>
+            <?php endif; ?>
+        </div>
+
+        <div class="botones">
+            <button type="submit" class="btn">Registrar inscripción al curso</button>
+        </div>
+    </form>
+</section>
 <!-- ============ CURSADAS POR ESPACIO CURRICULAR ============ -->
 
 <section class="tarjeta">

@@ -12,35 +12,26 @@ $tipos    = cargar_tipos();
 $datos    = datos_vacios($usuario);
 $docs     = docs_vacios($tipos);
 
-$inscripcion = [
-    'fecha_inscripcion' => date('Y-m-d'),
-    'curso' => '',
-    'condicion' => '',
-    'observaciones' => ''
-];
-
 $errores = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $datos = datos_desde_post($_POST);
     $docs  = docs_desde_post($_POST, $tipos);
-    $inscripcion = inscripcion_curso_desde_post($_POST);
+   
 
     if (!csrf_valido()) {
         $errores['general'] = 'El formulario venció. Revise los datos y vuelva a guardar.';
     } else {
         $errores =
             validar_estudiante($datos, $usuario, 0)
-            + validar_docs($docs, $tipos)
-            + validar_inscripcion_curso($inscripcion);
+            + validar_docs($docs, $tipos);
 
         if (!$errores) {
             try {
                 $id = crear_estudiante(
                     $datos,
                     $docs,
-                    $usuario['id_usuario'],
-                    $inscripcion
+                    $usuario['id_usuario']
                 );
 
                 flash('ok', 'Expediente e inscripción creados correctamente.');
@@ -72,7 +63,7 @@ render_form_estudiante(
     'nuevo.php',
     'Guardar expediente',
     'index.php',
-    $inscripcion
+   
 );
 
 render_footer();
