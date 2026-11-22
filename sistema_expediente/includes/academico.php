@@ -1317,12 +1317,6 @@ function nombre_espacio_academico(
 
     return $nombre;
 }
-        // Volver a comprobar que la materia no esté ya aprobada (doble cursado).
-    if (espacio_ya_aprobado($idEst, $idMateria, $d['id_submateria'] !== null ? (int)$d['id_submateria'] : null)) {
-            throw new RuntimeException(
-                'No se puede realizar la inscripción: el alumno ya tiene aprobada esta materia.'
-            );
-    }
 /*
  * Registrar la inscripción inicial a una materia o submateria.
  */
@@ -1347,6 +1341,13 @@ function guardar_inscripcion(
                 'No se puede realizar la inscripción porque falta presentar '
                 . 'la documentación obligatoria del año actual: '
                 . implode(', ', $nombres) . '.'
+            );
+        }
+
+        // Volver a comprobar que la materia no esté ya aprobada (doble cursado).
+        if (espacio_ya_aprobado($idEst, $idMateria, $d['id_submateria'] !== null ? (int)$d['id_submateria'] : null)) {
+            throw new RuntimeException(
+                'No se puede realizar la inscripción: el alumno ya tiene aprobada esta materia.'
             );
         }
 
