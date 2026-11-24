@@ -5,7 +5,7 @@
  */
 
 @page {
-  size: A4 landscape;
+  size: legal landscape;
   margin: 8mm 10mm;
 }
 
@@ -60,11 +60,11 @@
   opacity: .92;
 }
 
-/* Hoja A4 horizontal en pantalla */
+/* Hoja legal horizontal en pantalla */
 .hoja {
-  width: 297mm;
+  width: 356mm;
   max-width: calc(100vw - 24px);
-  min-height: 210mm;
+  min-height: 216mm;
   margin: 12mm auto;
   padding: 10mm 12mm;
   background: #fff;

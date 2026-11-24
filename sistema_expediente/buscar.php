@@ -70,7 +70,7 @@ render_header('Buscar alumnos', $usuario);
         <td><?= e($f['dni']) ?></td>
         <td><?= e($f['carrera']) ?> (<?= e($f['turno']) ?>)</td>
         <td><?= (int)$f['anio_ingreso'] ?></td>
-        <td><?= e(anio_que_cursa((int)$f['anio_ingreso'], $f['estado'])) ?></td>
+        <td><?= e(anio_que_cursa_alumno((int)$f['id_estudiante'], $f['estado'])) ?></td>
         <td><?= e($f['estado']) ?></td>
         <td class="acciones">
           <a href="ver.php?id=<?= (int)$f['id_estudiante'] ?>">Ver</a>
