@@ -356,33 +356,27 @@ fieldset {border-radius:12px;}
     background: #0759A8;
 }
 
-/* Botones principales */
-/* Botones principales */
+/* Botones principales y secundarios */
 
-.btn {
+.btn,
+.btn.btn-sec {
     background: #0759A8;
-    border-color: #0759A8;
     color: #FFFFFF;
+    border: 1px solid #0759A8;
+    transition: background 0.2s ease, color 0.2s ease;
 }
+
+/* Al pasar el mouse o tocar el botón */
 
 .btn:hover,
-.btn:focus {
-    background: #FFFFFF;
-    color: #0759A8;
-}
-
-/* Botones secundarios */
-
-.btn.btn-sec {
+.btn:focus,
+.btn:active,
+.btn.btn-sec:hover,
+.btn.btn-sec:focus,
+.btn.btn-sec:active {
     background: #FFFFFF;
     color: #0759A8;
     border-color: #0759A8;
-}
-
-.btn.btn-sec:hover,
-.btn.btn-sec:focus {
-    background: #eaf1f8;
-    color: #0759A8;
 }
 
 /* Títulos */
