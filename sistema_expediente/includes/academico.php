@@ -1485,6 +1485,22 @@ function guardar_cursada(
                 'El carácter de cursada no es válido.'
             );
         }
+                // Para promocionar se exigen las correlativas APROBADAS
+        // (columna "Rendir o Promocionar" de la Res. 2281-E-20).
+        if ($caracter === 'promocional') {
+            $pendientes = correlativas_pendientes(
+                $idEst,
+                (int)$c['id_materia'],
+                'rendir'
+            );
+
+            if ($pendientes) {
+                throw new RuntimeException(
+                    'No se puede cargar como Promoción. Faltan aprobar estas correlativas: '
+                    . implode(', ', array_column($pendientes, 'materia_requerida')) . '.'
+                );
+            }
+        }
 
         $st = $pdo->prepare("
             UPDATE cursadas
