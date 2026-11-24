@@ -43,6 +43,11 @@ render_header('Expediente: ' . $a['apellido'] . ', ' . $a['nombre'], $usuario);
 <?php if ($puedeModificar): ?>
     <a class="btn" href="editar.php?id=<?= (int)$a['id_estudiante'] ?>">
         Modificar datos
+        <?php if (tiene_permiso($usuario, 'expedientes.eliminar', true) && carrera_permitida($usuario, (int)$a['id_carrera'])): ?>
+    <a class="btn btn-sec" href="borrar.php?id=<?= (int)$a['id_estudiante'] ?>">
+        Eliminar expediente
+    </a>
+<?php endif; ?>
     </a>
 <?php endif; ?>
 
